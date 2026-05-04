@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (_emailCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) {
-      _showError('Email dan password tidak boleh kosong.');
+      _showError('Semua kolom harus diisi.');
       return;
     }
     setState(() => _loading = true);
@@ -37,7 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailCtrl.text.trim(),
         password: _passCtrl.text,
       );
-      // StreamBuilder di main.dart otomatis redirect ke MainNav
+      if (!mounted) return;
+      // StreamBuilder di main.dart akan secara otomatis me-render MainNav
+      Navigator.popUntil(context, (route) => route.isFirst);
     } catch (e) {
       _showError(e.toString());
     } finally {
@@ -49,14 +51,14 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _googleLoading = true);
     try {
       final result = await _authService.signInWithGoogle();
-      if (result == null && mounted) {
-        // user cancel — tidak perlu tampilkan error
+      if (result != null && mounted) {
+        // StreamBuilder di main.dart akan secara otomatis me-render MainNav
+        Navigator.popUntil(context, (route) => route.isFirst);
+      } else if (result == null && mounted) {
         setState(() => _googleLoading = false);
       }
-      // Jika sukses, StreamBuilder otomatis redirect
     } catch (e) {
       if (mounted) _showError(e.toString());
-    } finally {
       if (mounted) setState(() => _googleLoading = false);
     }
   }
@@ -88,13 +90,13 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Login to your account',
+                  'Welcome back',
                   style: GoogleFonts.dmSans(
                       color: Colors.white.withOpacity(0.75), fontSize: 13),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Welcome to\nW-GYM',
+                  'Login to your\nAccount',
                   style: GoogleFonts.bebasNeue(
                       color: Colors.white,
                       fontSize: 42,
@@ -131,12 +133,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: AppTheme.gray,
                           size: 20,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscure = !_obscure),
+                        onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   // Tombol Login
                   ElevatedButton(
@@ -178,17 +179,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Don't have an account? ",
+                        'Don\'t have an account? ',
                         style: GoogleFonts.dmSans(
                             color: AppTheme.gray, fontSize: 13),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const RegisterScreen())),
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const RegisterScreen()),
+                        ),
                         child: Text(
-                          'Register',
+                          'Register here',
                           style: GoogleFonts.dmSans(
                               color: AppTheme.orange,
                               fontSize: 13,
@@ -207,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// ─── Widget Tombol Google ─────────────────────────────────────────────────────
+// ─── Widget Tombol Google (sama persis dengan register_screen) ───────────────────
 class _GoogleButton extends StatelessWidget {
   final bool loading;
   final VoidCallback onTap;
@@ -266,7 +268,6 @@ class _GoogleButton extends StatelessWidget {
   }
 }
 
-// ─── Custom Google Logo ───────────────────────────────────────────────────────
 class _GoogleLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

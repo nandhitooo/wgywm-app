@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/activity_service.dart';
-import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,26 +21,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _uploadingPhoto = false;
   bool _savingName = false;
   String? _photoBase64;
+  String? _photoUrl; // Tambahan untuk menyimpan URL dari Google
 
   @override
   void initState() {
     super.initState();
     _auth.getProfile().then((data) {
       if (data != null && mounted) {
-        setState(() => _photoBase64 = data['photoBase64']);
+        setState(() {
+          _photoBase64 = data['photoBase64'];
+          _photoUrl = data['photoUrl']; // Ambil photoUrl dari Firestore
+        });
       }
     });
   }
 
   void _editName() {
-    final ctrl =
-        TextEditingController(text: _auth.currentUser?.displayName ?? '');
+    final ctrl = TextEditingController(text: _auth.currentUser?.displayName ?? '');
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Ubah Nama',
-            style: GoogleFonts.bebasNeue(fontSize: 20, letterSpacing: 1)),
+        title: Text('Ubah Nama', style: GoogleFonts.bebasNeue(fontSize: 20, letterSpacing: 1)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
@@ -50,8 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child:
-                Text('Batal', style: GoogleFonts.dmSans(color: AppTheme.gray)),
+            child: Text('Batal', style: GoogleFonts.dmSans(color: AppTheme.gray)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -72,8 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _pickPhoto() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -82,27 +81,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Container(
               width: 40,
               height: 4,
-              decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(height: 16),
-            Text('Pilih Foto Profil',
-                style: GoogleFonts.dmSans(
-                    fontSize: 16, fontWeight: FontWeight.w600)),
+            Text('Pilih Foto Profil', style: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             ListTile(
               leading: Container(
                 width: 44,
                 height: 44,
-                decoration: BoxDecoration(
-                    color: AppTheme.orange.withOpacity(0.1),
-                    shape: BoxShape.circle),
-                child: const Icon(Icons.photo_library_outlined,
-                    color: AppTheme.orange),
+                decoration: BoxDecoration(color: AppTheme.orange.withOpacity(0.1), shape: BoxShape.circle),
+                child: const Icon(Icons.photo_library_outlined, color: AppTheme.orange),
               ),
-              title: Text('Pilih dari Galeri',
-                  style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
+              title: Text('Pilih dari Galeri', style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
               onTap: () {
                 Navigator.pop(context);
                 _uploadPhoto(ImageSource.gallery);
@@ -112,14 +103,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               leading: Container(
                 width: 44,
                 height: 44,
-                decoration: BoxDecoration(
-                    color: AppTheme.orange.withOpacity(0.1),
-                    shape: BoxShape.circle),
-                child: const Icon(Icons.camera_alt_outlined,
-                    color: AppTheme.orange),
+                decoration: BoxDecoration(color: AppTheme.orange.withOpacity(0.1), shape: BoxShape.circle),
+                child: const Icon(Icons.camera_alt_outlined, color: AppTheme.orange),
               ),
-              title: Text('Buka Kamera',
-                  style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
+              title: Text('Buka Kamera', style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
               onTap: () {
                 Navigator.pop(context);
                 _uploadPhoto(ImageSource.camera);
@@ -134,22 +121,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _uploadPhoto(ImageSource source) async {
     final picker = ImagePicker();
-    final picked =
-        await picker.pickImage(source: source, imageQuality: 50, maxWidth: 300);
+    final picked = await picker.pickImage(source: source, imageQuality: 50, maxWidth: 300);
     if (picked == null) return;
 
     setState(() => _uploadingPhoto = true);
     try {
       final url = await _auth.updatePhoto(File(picked.path));
-      if (mounted) setState(() => _photoBase64 = url);
+      if (mounted) {
+        setState(() {
+          _photoBase64 = url;
+          _photoUrl = null; // Reset Google photo jika user upload manual
+        });
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('$e', style: GoogleFonts.dmSans()),
           backgroundColor: Colors.red.shade600,
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     } finally {
@@ -161,9 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       color: Colors.white.withOpacity(0.3),
       child: Center(
-        child: Text(initials,
-            style: GoogleFonts.bebasNeue(
-                color: Colors.white, fontSize: 28, letterSpacing: 1)),
+        child: Text(initials, style: GoogleFonts.bebasNeue(color: Colors.white, fontSize: 28, letterSpacing: 1)),
       ),
     );
   }
@@ -174,20 +162,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final activities = _actSvc.getAll(_auth.userId);
     final totalCal = activities.fold(0, (s, a) => s + a.calories);
     final totalMin = activities.fold(0, (s, a) => s + a.durationMinutes);
-    final initials = (user?.displayName ?? 'U')
-        .split(' ')
-        .take(2)
-        .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '')
-        .join();
+    final initials = (user?.displayName ?? 'U').split(' ').take(2).map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join();
 
     final now = DateTime.now();
     final weekCal = List.generate(7, (i) {
       final day = now.subtract(Duration(days: 6 - i));
       return activities
-          .where((a) =>
-              a.date.year == day.year &&
-              a.date.month == day.month &&
-              a.date.day == day.day)
+          .where((a) => a.date.year == day.year && a.date.month == day.month && a.date.day == day.day)
           .fold(0, (s, a) => s + a.calories)
           .toDouble();
     });
@@ -200,12 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             width: double.infinity,
             color: AppTheme.orange,
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 20,
-              left: 20,
-              right: 20,
-              bottom: 28,
-            ),
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 20, left: 20, right: 20, bottom: 28),
             child: Column(
               children: [
                 // Avatar
@@ -217,21 +193,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       height: 84,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                            color: Colors.white.withOpacity(0.6), width: 3),
+                        border: Border.all(color: Colors.white.withOpacity(0.6), width: 3),
                       ),
                       child: ClipOval(
                         child: _uploadingPhoto
                             ? Container(
                                 color: Colors.white.withOpacity(0.3),
-                                child: const CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
-                            : _photoBase64 != null
-                                ? Image.memory(
-                                    base64Decode(_photoBase64!.split(',').last),
-                                    fit: BoxFit.cover,
-                                  )
-                                : _avatarFallback(initials),
+                                child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : (_photoBase64 != null && _photoBase64!.isNotEmpty)
+                                ? Image.memory(base64Decode(_photoBase64!.split(',').last), fit: BoxFit.cover)
+                                : (_photoUrl != null && _photoUrl!.isNotEmpty)
+                                    ? Image.network(_photoUrl!, fit: BoxFit.cover)
+                                    : _avatarFallback(initials),
                       ),
                     ),
                     GestureDetector(
@@ -239,10 +212,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Container(
                         width: 28,
                         height: 28,
-                        decoration: const BoxDecoration(
-                            color: Colors.white, shape: BoxShape.circle),
-                        child: const Icon(Icons.camera_alt,
-                            size: 16, color: AppTheme.orange),
+                        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                        child: const Icon(Icons.camera_alt, size: 16, color: AppTheme.orange),
                       ),
                     ),
                   ],
@@ -254,37 +225,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _savingName
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
+                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                         : Text(
                             user?.displayName ?? 'User',
-                            style: GoogleFonts.bebasNeue(
-                                color: Colors.white,
-                                fontSize: 26,
-                                letterSpacing: 1),
+                            style: GoogleFonts.bebasNeue(color: Colors.white, fontSize: 26, letterSpacing: 1),
                           ),
                     const SizedBox(width: 8),
                     GestureDetector(
                       onTap: _editName,
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(Icons.edit,
-                            size: 14, color: Colors.white),
+                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
+                        child: const Icon(Icons.edit, size: 14, color: Colors.white),
                       ),
                     ),
                   ],
                 ),
                 Text(
                   user?.email ?? '',
-                  style: GoogleFonts.dmSans(
-                      color: Colors.white.withOpacity(0.75), fontSize: 12),
+                  style: GoogleFonts.dmSans(color: Colors.white.withOpacity(0.75), fontSize: 12),
                 ),
               ],
             ),
@@ -295,12 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text('YOUR PROGRESS',
-                    style: GoogleFonts.dmSans(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.dark,
-                        letterSpacing: 0.8)),
+                Text('YOUR PROGRESS', style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.dark, letterSpacing: 0.8)),
                 const SizedBox(height: 10),
 
                 // Chart
@@ -314,52 +268,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Kalori 7 Hari Terakhir',
-                          style: GoogleFonts.dmSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.dark)),
+                      Text('Kalori 7 Hari Terakhir', style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.dark)),
                       const SizedBox(height: 14),
                       SizedBox(
                         height: 120,
                         child: BarChart(BarChartData(
                           alignment: BarChartAlignment.spaceAround,
-                          maxY: (weekCal.isEmpty
-                                  ? 200
-                                  : weekCal.reduce((a, b) => a > b ? a : b) +
-                                      100)
-                              .clamp(200, 1000)
-                              .toDouble(),
+                          maxY: (weekCal.isEmpty ? 200 : weekCal.reduce((a, b) => a > b ? a : b) + 100).clamp(200, 1000).toDouble(),
                           barTouchData: BarTouchData(enabled: false),
                           titlesData: FlTitlesData(
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (val, _) {
-                                  const days = [
-                                    'Sen',
-                                    'Sel',
-                                    'Rab',
-                                    'Kam',
-                                    'Jum',
-                                    'Sab',
-                                    'Min'
-                                  ];
+                                  final day = now.subtract(Duration(days: 6 - val.toInt()));
+                                  const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
                                   return Padding(
                                     padding: const EdgeInsets.only(top: 4),
-                                    child: Text(days[val.toInt()],
-                                        style: GoogleFonts.dmSans(
-                                            fontSize: 9, color: AppTheme.gray)),
+                                    child: Text(days[day.weekday - 1], style: GoogleFonts.dmSans(fontSize: 9, color: AppTheme.gray)),
                                   );
                                 },
                               ),
                             ),
-                            leftTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false)),
-                            topTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false)),
-                            rightTitles: const AxisTitles(
-                                sideTitles: SideTitles(showTitles: false)),
+                            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                           ),
                           borderData: FlBorderData(show: false),
                           gridData: const FlGridData(show: false),
@@ -368,12 +301,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               (i) => BarChartGroupData(x: i, barRods: [
                                     BarChartRodData(
                                       toY: weekCal[i],
-                                      color: i == 6
-                                          ? AppTheme.orange
-                                          : const Color(0xFFFAD38F),
+                                      color: i == 6 ? AppTheme.orange : const Color(0xFFFAD38F),
                                       width: 18,
-                                      borderRadius: const BorderRadius.vertical(
-                                          top: Radius.circular(5)),
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
                                     )
                                   ])),
                         )),
@@ -390,9 +320,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(width: 10),
                     _StatCard(value: '$totalCal', label: 'Total Cal'),
                     const SizedBox(width: 10),
-                    _StatCard(
-                        value: '${(totalMin / 60).toStringAsFixed(1)}h',
-                        label: 'Total Waktu'),
+                    _StatCard(value: '${(totalMin / 60).toStringAsFixed(1)}h', label: 'Total Waktu'),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -402,22 +330,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPressed: () async {
                     await _auth.logout();
                     if (context.mounted) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const LoginScreen()));
+                      Navigator.popUntil(context, (route) => route.isFirst);
                     }
                   },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.orange,
                     side: const BorderSide(color: AppTheme.orange),
                     minimumSize: const Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text('LOGOUT',
-                      style: GoogleFonts.dmSans(
-                          fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                  child: Text('LOGOUT', style: GoogleFonts.dmSans(fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                 ),
               ],
             ),
@@ -445,12 +367,9 @@ class _StatCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(value,
-                style: GoogleFonts.bebasNeue(
-                    fontSize: 24, color: AppTheme.dark, letterSpacing: 1)),
+            Text(value, style: GoogleFonts.bebasNeue(fontSize: 24, color: AppTheme.dark, letterSpacing: 1)),
             const SizedBox(height: 2),
-            Text(label,
-                style: GoogleFonts.dmSans(fontSize: 10, color: AppTheme.gray)),
+            Text(label, style: GoogleFonts.dmSans(fontSize: 10, color: AppTheme.gray)),
           ],
         ),
       ),

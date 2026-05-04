@@ -34,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     if (_nameCtrl.text.trim().isEmpty ||
         _emailCtrl.text.trim().isEmpty ||
-        _passCtrl.text.isEmpty) {
+        _passCtrl.text.trim().isEmpty) {
       _showError('Semua kolom harus diisi.');
       return;
     }
@@ -116,13 +116,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _googleLoading = true);
     try {
       final result = await _authService.signInWithGoogle();
-      if (result == null && mounted) {
+      if (result != null && mounted) {
+        // [PERBAIKAN]: Tutup halaman Register ini dan kembali ke root
+        // StreamBuilder di main.dart akan secara otomatis me-render MainNav
+        Navigator.popUntil(context, (route) => route.isFirst);
+      } else if (result == null && mounted) {
         setState(() => _googleLoading = false);
       }
-      // Jika sukses, StreamBuilder di main.dart otomatis redirect ke MainNav
     } catch (e) {
       if (mounted) _showError(e.toString());
-    } finally {
       if (mounted) setState(() => _googleLoading = false);
     }
   }
@@ -157,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(
                   'Create your account',
                   style: GoogleFonts.dmSans(
-                      color: Colors.white.withOpacity(0.75), fontSize: 13),
+                      color: AppTheme.white.withValues(alpha: 0.75), fontSize: 13),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -317,7 +319,7 @@ class _GoogleButton extends StatelessWidget {
           border: Border.all(color: const Color(0xFFDDDDDD)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

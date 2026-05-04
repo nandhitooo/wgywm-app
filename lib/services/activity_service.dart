@@ -125,7 +125,7 @@ class ActivityService {
   // ─── Cek koneksi internet ────────────────────────────────────────────────
   Future<bool> _isOnline() async {
     final result = await Connectivity().checkConnectivity();
-    return result != ConnectivityResult.none;
+    return !result.contains(ConnectivityResult.none);
   }
 
   // ─── Stream untuk rebuild UI otomatis saat data Hive berubah ─────────────

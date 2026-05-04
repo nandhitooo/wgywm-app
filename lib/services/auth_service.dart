@@ -8,10 +8,6 @@ class AuthService {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
-  // Web client ID dari google-services.json (client_type: 3)
-  static const _webClientId =
-      '587869616564-3n64lg9h3dkvgpsmegc5v8s16q0u3tua.apps.googleusercontent.com';
-
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
   String get userId => _auth.currentUser?.uid ?? '';
@@ -58,7 +54,7 @@ class AuthService {
   // ─── Login dengan Google ──────────────────────────────────────────────────
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      final googleSignIn = GoogleSignIn(serverClientId: _webClientId);
+      final googleSignIn = GoogleSignIn();
 
       // Sign out dulu agar selalu muncul picker akun
       await googleSignIn.signOut();
@@ -104,7 +100,8 @@ class AuthService {
 
   // ─── Logout ───────────────────────────────────────────────────────────────
   Future<void> logout() async {
-    await GoogleSignIn().signOut();
+    final googleSignIn = GoogleSignIn();
+    await googleSignIn.signOut();
     await _auth.signOut();
   }
 
