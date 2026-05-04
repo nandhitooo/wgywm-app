@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "587869616564-9crck1p50e8d3h2o6mnvnbd4pn14frr6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wgym",
+            "certificate_hash": "5d5e28fd82ffc531c18c76a65938b47b59336e5f"
+          }
+        },
+        {
           "client_id": "587869616564-3n64lg9h3dkvgpsmegc5v8s16q0u3tua.apps.googleusercontent.com",
           "client_type": 3
         }
