@@ -18,8 +18,74 @@ class _AddScreenState extends State<AddScreen> {
   final _repsCtrl = TextEditingController();
   final _activityService = ActivityService();
   final _authService = AuthService();
+  double? _userWeight;
+  final Map<String, double> _metValues = {
+    'Plank': 3.0,
+    'Yoga': 3.0,
+    'Sit Up': 4.5,
+    'Squat': 4.5,
+    'Push Up': 8.0,
+    'Pull Up': 8.0,
+    'Morning Run': 9.0,
+    'Cycling': 7.5,
+    'Swimming': 9.0,
+    'Jump Rope': 11.5,
+    'Stretch': 3.0,
+    'Pilates': 3.0,
+    'Badminton': 5.5,
+    'Football': 8.0,
+    'Burpees': 10.0,
+    'Stair Climbing': 8.0,
+    'Hiking': 6.5,
+  };
+  final List<Map<String, dynamic>> _workoutCategories = [
+    {
+      'name': 'Strength Training',
+      'types': ['Push Up', 'Pull Up', 'Squat', 'Sit Up'],
+    },
+    {
+      'name': 'Cardio',
+      'types': ['Morning Run', 'Cycling', 'Swimming'],
+    },
+    {
+      'name': 'Core & Flexibility',
+      'types': ['Plank', 'Yoga', 'Stretch', 'Pilates'],
+    },
+    {
+      'name': 'Sport',
+      'types': ['Badminton', 'Football'],
+    },
+    {
+      'name': 'HIIT',
+      'types': ['Jump Rope', 'Burpees', 'Stair Climbing'],
+    },
+    {
+      'name': 'Outdoor',
+      'types': ['Hiking'],
+    },
+  ];
+  String? _selectedCategory;
+  String? _selectedType;
   bool _loading = false;
   TimeOfDay _selectedTime = TimeOfDay.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserWeight();
+  }
+
+  Future<void> _loadUserWeight() async {
+    final profile = await _authService.getProfile();
+    if (profile != null) {
+      final weightValue = profile['weight']?.toString();
+      final parsedWeight = double.tryParse(weightValue ?? '');
+      if (parsedWeight != null && mounted) {
+        setState(() => _userWeight = parsedWeight);
+        _updateCalories();
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -41,19 +107,24 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Future<void> _save() async {
-    if (_workoutCtrl.text.trim().isEmpty) {
-      _showSnack('Masukkan nama workout.', isError: true);
+    final workoutName = _selectedType ?? _workoutCtrl.text.trim();
+    if (workoutName.isEmpty) {
+      _showSnack('Pilih jenis workout atau masukkan nama workout.', isError: true);
       return;
     }
+    final computedCalories = _calculateCalories();
+    final calories = computedCalories ?? int.tryParse(_calCtrl.text) ?? 100;
     setState(() => _loading = true);
     try {
       await _activityService.add(
         userId: _authService.userId,
-        name: _workoutCtrl.text.trim(),
+        name: workoutName,
         durationMinutes: int.tryParse(_durationCtrl.text) ?? 20,
-        calories: int.tryParse(_calCtrl.text) ?? 100,
+        calories: calories,
         reps: int.tryParse(_repsCtrl.text) ?? 0,
       );
+      _selectedCategory = null;
+      _selectedType = null;
       _workoutCtrl.clear(); _durationCtrl.clear();
       _calCtrl.clear(); _repsCtrl.clear();
       _showSnack('Aktivitas tersimpan!');
@@ -61,6 +132,25 @@ class _AddScreenState extends State<AddScreen> {
       _showSnack('Gagal menyimpan: $e', isError: true);
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  int? _calculateCalories() {
+    final duration = int.tryParse(_durationCtrl.text);
+    if (duration == null || duration <= 0) return null;
+    final typeName = _selectedType ?? _workoutCtrl.text.trim();
+    if (typeName.isEmpty) return null;
+    final met = _metValues[typeName];
+    if (met == null) return null;
+    final weight = _userWeight ?? 70.0;
+    final calories = met * 3.5 * weight / 200 * duration;
+    return calories.round();
+  }
+
+  void _updateCalories() {
+    final calories = _calculateCalories();
+    if (calories != null) {
+      _calCtrl.text = calories.toString();
     }
   }
 
@@ -79,15 +169,6 @@ class _AddScreenState extends State<AddScreen> {
             style: GoogleFonts.dmSans(
                 fontSize: 11, fontWeight: FontWeight.w700,
                 color: AppTheme.gray, letterSpacing: 0.8)),
-      );
-
-  Widget _addBtn(VoidCallback onTap) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 42, height: 42,
-          decoration: const BoxDecoration(color: AppTheme.orange, shape: BoxShape.circle),
-          child: const Icon(Icons.add, color: Colors.white, size: 22),
-        ),
       );
 
   @override
@@ -123,30 +204,86 @@ class _AddScreenState extends State<AddScreen> {
                 children: [
                   const SizedBox(height: 4),
                   _label('Your Workout'),
-                  Row(children: [
-                    Expanded(child: TextField(controller: _workoutCtrl,
-                        decoration: const InputDecoration(hintText: 'e.g. Push Up'))),
-                    const SizedBox(width: 10),
-                    _addBtn(() {}),
-                  ]),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: _workoutCategories.map((category) {
+                      final selected = _selectedCategory == category['name'];
+                      return ChoiceChip(
+                        label: Text(category['name'],
+                            style: GoogleFonts.dmSans(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: selected ? Colors.white : AppTheme.gray)),
+                        selected: selected,
+                        selectedColor: AppTheme.orange,
+                        backgroundColor: AppTheme.white,
+                        side: BorderSide(color: selected ? AppTheme.orange : AppTheme.gray.withOpacity(0.35)),
+                        onSelected: (onSelected) {
+                          setState(() {
+                            _selectedCategory = onSelected ? category['name'] as String : null;
+                            _selectedType = null;
+                            _workoutCtrl.clear();
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  if (_selectedCategory != null) ...[
+                    const SizedBox(height: 16),
+                    _label('Jenis Workout'),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: List<String>.from(
+                              _workoutCategories.firstWhere((cat) => cat['name'] == _selectedCategory!)['types'] as List)
+                          .map<Widget>((type) {
+                        final selected = _selectedType == type;
+                        return ChoiceChip(
+                          label: Text(type,
+                              style: GoogleFonts.dmSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: selected ? Colors.white : AppTheme.gray)),
+                          selected: selected,
+                          selectedColor: AppTheme.orange,
+                          backgroundColor: AppTheme.white,
+                          side: BorderSide(color: selected ? AppTheme.orange : AppTheme.gray.withOpacity(0.35)),
+                          onSelected: (onSelected) {
+                            setState(() {
+                              _selectedType = onSelected ? type : null;
+                              if (onSelected) {
+                                _workoutCtrl.text = type;
+                              }
+                              _updateCalories();
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _workoutCtrl,
+                    onChanged: (value) {
+                      if (_selectedType != null && value != _selectedType) {
+                        setState(() => _selectedType = null);
+                      }
+                    },
+                    decoration: const InputDecoration(
+                        hintText: 'Pilih jenis workout atau masukkan nama workout'),
+                  ),
                   const SizedBox(height: 20),
                   _label('Duration (minutes)'),
-                  Row(children: [
-                    Expanded(child: TextField(controller: _durationCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(hintText: 'e.g. 30'))),
-                    const SizedBox(width: 10),
-                    _addBtn(() {}),
-                  ]),
+                  TextField(controller: _durationCtrl,
+                      keyboardType: TextInputType.number,
+                      onChanged: (_) => _updateCalories(),
+                      decoration: const InputDecoration(hintText: 'e.g. 30')),
                   const SizedBox(height: 20),
-                  _label('Calories Burned'),
-                  Row(children: [
-                    Expanded(child: TextField(controller: _calCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(hintText: 'e.g. 200'))),
-                    const SizedBox(width: 10),
-                    _addBtn(() {}),
-                  ]),
+                  _label('Calories Burned (auto-calculated, can edit manually)'),
+                  TextField(controller: _calCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(hintText: 'e.g. 200')),
                   const SizedBox(height: 20),
                   _label('Enter Reps'),
                   Row(children: [
@@ -154,7 +291,6 @@ class _AddScreenState extends State<AddScreen> {
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(hintText: 'e.g. 20'))),
                     const SizedBox(width: 10),
-                    _addBtn(() {}),
                   ]),
                   const SizedBox(height: 32),
                   ElevatedButton(

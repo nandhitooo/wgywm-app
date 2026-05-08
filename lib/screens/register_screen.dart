@@ -16,6 +16,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   final _retypeCtrl = TextEditingController();
+  final _weightCtrl = TextEditingController();
+  final _heightCtrl = TextEditingController();
+  DateTime? _birthDate;
   final _authService = AuthService();
   bool _obscure1 = true;
   bool _obscure2 = true;
@@ -28,13 +31,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailCtrl.dispose();
     _passCtrl.dispose();
     _retypeCtrl.dispose();
+    _weightCtrl.dispose();
+    _heightCtrl.dispose();
     super.dispose();
+  }
+
+  String get _birthDateText {
+    if (_birthDate == null) return 'Pilih tanggal lahir';
+    final y = _birthDate!.year.toString();
+    final m = _birthDate!.month.toString().padLeft(2, '0');
+    final d = _birthDate!.day.toString().padLeft(2, '0');
+    return '$d/$m/$y';
+  }
+
+  int get _age {
+    if (_birthDate == null) return 0;
+    final today = DateTime.now();
+    var age = today.year - _birthDate!.year;
+    if (today.month < _birthDate!.month ||
+        (today.month == _birthDate!.month && today.day < _birthDate!.day)) {
+      age -= 1;
+    }
+    return age;
+  }
+
+  Future<void> _pickBirthDate() async {
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(primary: AppTheme.orange),
+        ),
+        child: child!,
+      ),
+    );
+    if (selected != null && mounted) {
+      setState(() => _birthDate = selected);
+    }
   }
 
   Future<void> _register() async {
     if (_nameCtrl.text.trim().isEmpty ||
         _emailCtrl.text.trim().isEmpty ||
-        _passCtrl.text.trim().isEmpty) {
+        _passCtrl.text.trim().isEmpty ||
+        _birthDate == null ||
+        _weightCtrl.text.trim().isEmpty ||
+        _heightCtrl.text.trim().isEmpty) {
       _showError('Semua kolom harus diisi.');
       return;
     }
@@ -48,6 +93,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         name: _nameCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
         password: _passCtrl.text,
+        birthDate: _birthDate!.toIso8601String(),
+        weight: _weightCtrl.text.trim(),
+        height: _heightCtrl.text.trim(),
       );
 
       // Logout dulu supaya tidak auto-login
@@ -191,6 +239,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(hintText: 'Email'),
+                  ),
+                  const SizedBox(height: 14),
+                  GestureDetector(
+                    onTap: _pickBirthDate,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: AppTheme.lightGray,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFDDDDDD)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(_birthDateText,
+                              style: GoogleFonts.dmSans(
+                                  fontSize: 14,
+                                  color: _birthDate == null ? AppTheme.gray : AppTheme.dark)),
+                          const Icon(Icons.calendar_month, color: AppTheme.gray, size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+                          decoration: BoxDecoration(
+                            color: AppTheme.lightGray,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFDDDDDD)),
+                          ),
+                          child: Text(
+                            _birthDate == null ? 'Umur' : '$_age tahun',
+                            style: GoogleFonts.dmSans(
+                                fontSize: 14, color: AppTheme.dark),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _weightCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(hintText: 'Berat (kg)'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _heightCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(hintText: 'Tinggi (cm)'),
                   ),
                   const SizedBox(height: 14),
                   TextField(

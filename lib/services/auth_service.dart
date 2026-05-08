@@ -17,6 +17,9 @@ class AuthService {
     required String name,
     required String email,
     required String password,
+    required String birthDate,
+    required String weight,
+    required String height,
   }) async {
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -28,7 +31,13 @@ class AuthService {
       await _firestore
           .collection('users')
           .doc(credential.user?.uid)
-          .set({'displayName': name, 'email': email}, SetOptions(merge: true));
+          .set({
+        'displayName': name,
+        'email': email,
+        'birthDate': birthDate,
+        'weight': weight,
+        'height': height,
+      }, SetOptions(merge: true));
       return credential;
     } on FirebaseAuthException catch (e) {
       throw _authErrorMessage(e.code);
@@ -137,6 +146,11 @@ class AuthService {
     } catch (_) {
       return null;
     }
+  }
+
+  // ─── Update data profil tambahan ──────────────────────────────────────────
+  Future<void> updateProfileData(Map<String, dynamic> data) async {
+    await _firestore.collection('users').doc(userId).set(data, SetOptions(merge: true));
   }
 
   // ─── Pesan error ─────────────────────────────────────────────────────────

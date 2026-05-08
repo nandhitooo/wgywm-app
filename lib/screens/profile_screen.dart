@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,8 +19,12 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = AuthService();
   final _actSvc = ActivityService();
+  final _weightCtrl = TextEditingController();
+  final _heightCtrl = TextEditingController();
+  DateTime? _birthDate;
   bool _uploadingPhoto = false;
   bool _savingName = false;
+  bool _savingProfile = false;
   String? _photoBase64;
   String? _photoUrl; // Tambahan untuk menyimpan URL dari Google
 
@@ -28,12 +33,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _auth.getProfile().then((data) {
       if (data != null && mounted) {
+        DateTime? birthDate;
+        final birthValue = data['birthDate'];
+        if (birthValue is DateTime) {
+          birthDate = birthValue;
+        } else if (birthValue is String) {
+          birthDate = DateTime.tryParse(birthValue);
+        } else if (birthValue is Timestamp) {
+          birthDate = birthValue.toDate();
+        }
+
         setState(() {
           _photoBase64 = data['photoBase64'];
           _photoUrl = data['photoUrl']; // Ambil photoUrl dari Firestore
+          _birthDate = birthDate;
+          _weightCtrl.text = data['weight']?.toString() ?? '';
+          _heightCtrl.text = data['height']?.toString() ?? '';
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _weightCtrl.dispose();
+    _heightCtrl.dispose();
+    super.dispose();
+  }
+
+  String get _birthDateText {
+    if (_birthDate == null) return 'Pilih tanggal lahir';
+    final y = _birthDate!.year.toString();
+    final m = _birthDate!.month.toString().padLeft(2, '0');
+    final d = _birthDate!.day.toString().padLeft(2, '0');
+    return '$d/$m/$y';
+  }
+
+  int get _age {
+    if (_birthDate == null) return 0;
+    final today = DateTime.now();
+    var age = today.year - _birthDate!.year;
+    if (today.month < _birthDate!.month ||
+        (today.month == _birthDate!.month && today.day < _birthDate!.day)) {
+      age -= 1;
+    }
+    return age;
+  }
+
+  Future<void> _pickBirthDate() async {
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: _birthDate ?? DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: const ColorScheme.light(primary: AppTheme.orange),
+        ),
+        child: child!,
+      ),
+    );
+    if (selected != null && mounted) {
+      setState(() => _birthDate = selected);
+    }
+  }
+
+  Future<void> _saveProfileDetails() async {
+    if (_birthDate == null) {
+      _showSnack('Silakan pilih tanggal lahir.', isError: true);
+      return;
+    }
+    if (_weightCtrl.text.trim().isEmpty) {
+      _showSnack('Silakan masukkan berat badan.', isError: true);
+      return;
+    }
+    if (_heightCtrl.text.trim().isEmpty) {
+      _showSnack('Silakan masukkan tinggi badan.', isError: true);
+      return;
+    }
+
+    setState(() => _savingProfile = true);
+    try {
+      await _auth.updateProfileData({
+        'birthDate': _birthDate!.toIso8601String(),
+        'weight': _weightCtrl.text.trim(),
+        'height': _heightCtrl.text.trim(),
+      });
+      if (mounted) {
+        _showSnack('Data profil berhasil disimpan!');
+      }
+    } catch (e) {
+      _showSnack('Gagal menyimpan data profil: $e', isError: true);
+    } finally {
+      if (mounted) setState(() => _savingProfile = false);
+    }
+  }
+
+  void _showSnack(String msg, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg, style: GoogleFonts.dmSans()),
+      backgroundColor: isError ? Colors.red.shade600 : Colors.green.shade600,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ));
   }
 
   void _editName() {
@@ -254,6 +356,122 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                Text('PROFILE DETAILS', style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.dark, letterSpacing: 0.8)),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppTheme.cardBorder),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Tanggal Lahir', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12)),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: _pickBirthDate,
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.lightGray,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.cardBorder),
+                          ),
+                          child: Text(_birthDateText, style: GoogleFonts.dmSans(fontSize: 14, color: _birthDate == null ? AppTheme.gray : AppTheme.dark)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Umur', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12)),
+                                const SizedBox(height: 8),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.lightGray,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppTheme.cardBorder),
+                                  ),
+                                  child: Text(
+                                    _birthDate == null ? '-' : '$_age tahun',
+                                    style: GoogleFonts.dmSans(fontSize: 14, color: AppTheme.dark),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Berat Badan (kg)', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12)),
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: _weightCtrl,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: '70',
+                                    filled: true,
+                                    fillColor: AppTheme.lightGray,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: AppTheme.cardBorder),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: AppTheme.cardBorder),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text('Tinggi Badan (cm)', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12)),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _heightCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: '170',
+                          filled: true,
+                          fillColor: AppTheme.lightGray,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppTheme.cardBorder),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: AppTheme.cardBorder),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _savingProfile ? null : _saveProfileDetails,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: _savingProfile
+                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : Text('SIMPAN PROFIL', style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Text('YOUR PROGRESS', style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.dark, letterSpacing: 0.8)),
                 const SizedBox(height: 10),
 
