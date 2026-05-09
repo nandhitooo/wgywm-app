@@ -164,142 +164,269 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: 12),
         child: Text(text.toUpperCase(),
             style: GoogleFonts.dmSans(
-                fontSize: 11, fontWeight: FontWeight.w700,
-                color: AppTheme.gray, letterSpacing: 0.8)),
+                fontSize: 12, fontWeight: FontWeight.w800,
+                color: AppTheme.dark, letterSpacing: 1.2)),
       );
+
+  Widget _buildInputField(TextEditingController controller, String hint, IconData icon, {TextInputType keyboardType = TextInputType.text, Function(String)? onChanged}) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      onChanged: onChanged,
+      style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w500),
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, size: 18, color: AppTheme.orange),
+        filled: true,
+        fillColor: const Color(0xFFF8F9FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppTheme.orange, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        hintStyle: GoogleFonts.dmSans(color: AppTheme.gray, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
         children: [
+          // Gradient Header
           Container(
-            width: double.infinity, color: AppTheme.orange,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppTheme.orange, AppTheme.orange.withOpacity(0.85)],
+              ),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+              boxShadow: [BoxShadow(color: AppTheme.orange.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10))],
+            ),
             padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 20,
-              left: 20, right: 20, bottom: 24,
+              top: MediaQuery.of(context).padding.top + 24,
+              left: 20, right: 20, bottom: 32,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Log your workout',
                     style: GoogleFonts.dmSans(
-                        color: Colors.white.withOpacity(0.75), fontSize: 13)),
-                const SizedBox(height: 4),
+                        color: Colors.white.withOpacity(0.8), fontSize: 14, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 6),
                 Text('ADD ACTIVITIES',
                     style: GoogleFonts.bebasNeue(
-                        color: Colors.white, fontSize: 30, letterSpacing: 2)),
+                        color: Colors.white, fontSize: 32, letterSpacing: 1.5)),
               ],
             ),
           ),
+
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 4),
-                  _label('Your Workout'),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _workoutCategories.map((category) {
-                      final selected = _selectedCategory == category['name'];
-                      return ChoiceChip(
-                        label: Text(category['name'],
-                            style: GoogleFonts.dmSans(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: selected ? Colors.white : AppTheme.gray)),
-                        selected: selected,
-                        selectedColor: AppTheme.orange,
-                        backgroundColor: AppTheme.white,
-                        side: BorderSide(color: selected ? AppTheme.orange : AppTheme.gray.withOpacity(0.35)),
-                        onSelected: (onSelected) {
-                          setState(() {
-                            _selectedCategory = onSelected ? category['name'] as String : null;
-                            _selectedType = null;
-                            _workoutCtrl.clear();
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  if (_selectedCategory != null) ...[
-                    const SizedBox(height: 16),
-                    _label('Jenis Workout'),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: List<String>.from(
-                              _workoutCategories.firstWhere((cat) => cat['name'] == _selectedCategory!)['types'] as List)
-                          .map<Widget>((type) {
-                        final selected = _selectedType == type;
+                  // Category Selection
+                  _label('Select Category'),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                      border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+                    ),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _workoutCategories.map((category) {
+                        final selected = _selectedCategory == category['name'];
                         return ChoiceChip(
-                          label: Text(type,
+                          label: Text(category['name'],
                               style: GoogleFonts.dmSans(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
                                   color: selected ? Colors.white : AppTheme.gray)),
                           selected: selected,
                           selectedColor: AppTheme.orange,
-                          backgroundColor: AppTheme.white,
-                          side: BorderSide(color: selected ? AppTheme.orange : AppTheme.gray.withOpacity(0.35)),
+                          backgroundColor: Colors.white,
+                          side: BorderSide(
+                            color: selected ? AppTheme.orange : const Color(0xFFE8E8E8),
+                            width: selected ? 0 : 1.5,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           onSelected: (onSelected) {
                             setState(() {
-                              _selectedType = onSelected ? type : null;
-                              if (onSelected) {
-                                _workoutCtrl.text = type;
-                              }
-                              _updateCalories();
+                              _selectedCategory = onSelected ? category['name'] as String : null;
+                              _selectedType = null;
+                              _workoutCtrl.clear();
                             });
                           },
                         );
                       }).toList(),
                     ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Workout Type Selection
+                  if (_selectedCategory != null) ...[
+                    _label('Choose Workout Type'),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                        border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+                      ),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: List<String>.from(
+                                _workoutCategories.firstWhere((cat) => cat['name'] == _selectedCategory!)['types'] as List)
+                            .map<Widget>((type) {
+                          final selected = _selectedType == type;
+                          return ChoiceChip(
+                            label: Text(type,
+                                style: GoogleFonts.dmSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: selected ? Colors.white : AppTheme.gray)),
+                            selected: selected,
+                            selectedColor: AppTheme.orange,
+                            backgroundColor: Colors.white,
+                            side: BorderSide(
+                              color: selected ? AppTheme.orange : const Color(0xFFE8E8E8),
+                              width: selected ? 0 : 1.5,
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            onSelected: (onSelected) {
+                              setState(() {
+                                _selectedType = onSelected ? type : null;
+                                if (onSelected) {
+                                  _workoutCtrl.text = type;
+                                }
+                                _updateCalories();
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                   ],
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _workoutCtrl,
+
+                  // Custom Workout Input
+                  _label('Custom Workout Name'),
+                  _buildInputField(
+                    _workoutCtrl,
+                    'Enter workout name',
+                    Icons.fitness_center_outlined,
                     onChanged: (value) {
                       if (_selectedType != null && value != _selectedType) {
                         setState(() => _selectedType = null);
                       }
                     },
-                    decoration: const InputDecoration(
-                        hintText: 'Pilih jenis workout atau masukkan nama workout'),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Form Fields Section
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
+                      border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _label('Duration'),
+                        _buildInputField(
+                          _durationCtrl,
+                          'e.g. 30',
+                          Icons.schedule_outlined,
+                          keyboardType: TextInputType.number,
+                          onChanged: (_) => _updateCalories(),
+                        ),
+                        const SizedBox(height: 20),
+
+                        _label('Calories Burned'),
+                        Text(
+                          'Auto-calculated from duration and weight',
+                          style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontStyle: FontStyle.italic),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildInputField(
+                          _calCtrl,
+                          'e.g. 200',
+                          Icons.local_fire_department_outlined,
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: 20),
+
+                        _label('Reps (Optional)'),
+                        _buildInputField(
+                          _repsCtrl,
+                          'e.g. 20',
+                          Icons.repeat_outlined,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Save Button
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppTheme.orange, AppTheme.orange.withOpacity(0.85)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [BoxShadow(color: AppTheme.orange.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _save,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 56),
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: _loading
+                          ? const SizedBox(height: 24, width: 24,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.check_circle_outline, size: 20, color: Colors.white),
+                                const SizedBox(width: 8),
+                                Text('SAVE ACTIVITY',
+                                    style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
+                              ],
+                            ),
+                    ),
                   ),
                   const SizedBox(height: 20),
-                  _label('Duration (minutes)'),
-                  TextField(controller: _durationCtrl,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => _updateCalories(),
-                      decoration: const InputDecoration(hintText: 'e.g. 30')),
-                  const SizedBox(height: 20),
-                  _label('Calories Burned (auto-calculated, can edit manually)'),
-                  TextField(controller: _calCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(hintText: 'e.g. 200')),
-                  const SizedBox(height: 20),
-                  _label('Enter Reps'),
-                  Row(children: [
-                    Expanded(child: TextField(controller: _repsCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(hintText: 'e.g. 20'))),
-                    const SizedBox(width: 10),
-                  ]),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: _loading ? null : _save,
-                    child: _loading
-                        ? const SizedBox(height: 20, width: 20,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text('SAVE ACTIVITY'),
-                  ),
                 ],
               ),
             ),

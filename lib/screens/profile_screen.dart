@@ -258,6 +258,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  double get _bmi {
+    if (_birthDate == null || _weightCtrl.text.isEmpty || _heightCtrl.text.isEmpty) return 0;
+    final weight = double.tryParse(_weightCtrl.text) ?? 0;
+    final height = double.tryParse(_heightCtrl.text) ?? 0;
+    if (weight <= 0 || height <= 0) return 0;
+    return weight / ((height / 100) * (height / 100));
+  }
+
+  String get _bmiStatus {
+    if (_bmi == 0) return '-';
+    if (_bmi < 18.5) return 'Underweight';
+    if (_bmi < 25) return 'Normal';
+    if (_bmi < 30) return 'Overweight';
+    return 'Obese';
+  }
+
+  Color get _bmiColor {
+    if (_bmi == 0) return AppTheme.gray;
+    if (_bmi < 18.5) return Colors.blue;
+    if (_bmi < 25) return Colors.green;
+    if (_bmi < 30) return Colors.orange;
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
@@ -276,14 +300,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppTheme.lightGray,
+      backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
         children: [
-          // Header orange
+          // Enhanced Header with Gradient
           Container(
             width: double.infinity,
-            color: AppTheme.orange,
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 20, left: 20, right: 20, bottom: 28),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppTheme.orange, AppTheme.orange.withOpacity(0.85)],
+              ),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+              boxShadow: [BoxShadow(color: AppTheme.orange.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10))],
+            ),
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 24, left: 20, right: 20, bottom: 32),
             child: Column(
               children: [
                 // Avatar
@@ -291,11 +323,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   alignment: Alignment.bottomRight,
                   children: [
                     Container(
-                      width: 84,
-                      height: 84,
+                      width: 96,
+                      height: 96,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withOpacity(0.6), width: 3),
+                        border: Border.all(color: Colors.white.withOpacity(0.7), width: 4),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 12, spreadRadius: 2)],
                       ),
                       child: ClipOval(
                         child: _uploadingPhoto
@@ -312,40 +345,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     GestureDetector(
                       onTap: _pickPhoto,
                       child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                        child: const Icon(Icons.camera_alt, size: 16, color: AppTheme.orange),
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8)],
+                        ),
+                        child: const Icon(Icons.camera_alt_outlined, size: 16, color: AppTheme.orange),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 14),
 
                 // Nama + edit
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _savingName
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                         : Text(
                             user?.displayName ?? 'User',
-                            style: GoogleFonts.bebasNeue(color: Colors.white, fontSize: 26, letterSpacing: 1),
+                            style: GoogleFonts.bebasNeue(color: Colors.white, fontSize: 28, letterSpacing: 1.2),
                           ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     GestureDetector(
                       onTap: _editName,
                       child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
-                        child: const Icon(Icons.edit, size: 14, color: Colors.white),
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.25), borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 4),
                 Text(
                   user?.email ?? '',
-                  style: GoogleFonts.dmSans(color: Colors.white.withOpacity(0.75), fontSize: 12),
+                  style: GoogleFonts.dmSans(color: Colors.white.withOpacity(0.8), fontSize: 13, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -354,55 +392,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Body
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               children: [
-                Text('PROFILE DETAILS', style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.dark, letterSpacing: 0.8)),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.cardBorder),
-                  ),
+                // Profile Details Section
+                _buildSectionTitle('PROFILE DETAILS'),
+                const SizedBox(height: 12),
+                _buildModernCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Tanggal Lahir', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12)),
-                      const SizedBox(height: 8),
+                      Text('Tanggal Lahir', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 10),
                       GestureDetector(
                         onTap: _pickBirthDate,
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                           decoration: BoxDecoration(
-                            color: AppTheme.lightGray,
+                            color: const Color(0xFFF8F9FA),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppTheme.cardBorder),
+                            border: Border.all(color: const Color(0xFFE8E8E8), width: 1.5),
                           ),
-                          child: Text(_birthDateText, style: GoogleFonts.dmSans(fontSize: 14, color: _birthDate == null ? AppTheme.gray : AppTheme.dark)),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.calendar_today_outlined, size: 16, color: AppTheme.orange),
+                              const SizedBox(width: 10),
+                              Text(_birthDateText, style: GoogleFonts.dmSans(fontSize: 14, color: _birthDate == null ? AppTheme.gray : AppTheme.dark, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 18),
                       Row(
                         children: [
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Umur', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12)),
-                                const SizedBox(height: 8),
+                                Text('Umur', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 10),
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.lightGray,
+                                    color: const Color(0xFFF8F9FA),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppTheme.cardBorder),
+                                    border: Border.all(color: const Color(0xFFE8E8E8), width: 1.5),
                                   ),
-                                  child: Text(
-                                    _birthDate == null ? '-' : '$_age tahun',
-                                    style: GoogleFonts.dmSans(fontSize: 14, color: AppTheme.dark),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.person_outline, size: 16, color: AppTheme.orange),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        _birthDate == null ? '-' : '$_age tahun',
+                                        style: GoogleFonts.dmSans(fontSize: 14, color: AppTheme.dark, fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -413,83 +458,91 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Berat Badan (kg)', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12)),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: _weightCtrl,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    hintText: '70',
-                                    filled: true,
-                                    fillColor: AppTheme.lightGray,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: AppTheme.cardBorder),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(color: AppTheme.cardBorder),
-                                    ),
-                                  ),
-                                ),
+                                Text('Berat (kg)', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 10),
+                                _buildInputField(_weightCtrl, '70', Icons.monitor_weight_outlined),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      Text('Tinggi Badan (cm)', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12)),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _heightCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: '170',
-                          filled: true,
-                          fillColor: AppTheme.lightGray,
-                          border: OutlineInputBorder(
+                      const SizedBox(height: 18),
+                      Text('Tinggi Badan (cm)', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 10),
+                      _buildInputField(_heightCtrl, '170', Icons.straighten_outlined),
+                      const SizedBox(height: 18),
+
+                      // BMI Display
+                      if (_bmi > 0)
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: _bmiColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppTheme.cardBorder),
+                            border: Border.all(color: _bmiColor.withOpacity(0.3)),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppTheme.cardBorder),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('BMI', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 11, fontWeight: FontWeight.w600)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _bmi.toStringAsFixed(1),
+                                    style: GoogleFonts.bebasNeue(fontSize: 20, color: _bmiColor, letterSpacing: 1),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: _bmiColor,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  _bmiStatus,
+                                  style: GoogleFonts.dmSans(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _savingProfile ? null : _saveProfileDetails,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 48),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        child: _savingProfile
-                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : Text('SIMPAN PROFIL', style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w700)),
-                      ),
+
+                      const SizedBox(height: 18),
+                      _buildSaveButton(),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                Text('YOUR PROGRESS', style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.dark, letterSpacing: 0.8)),
-                const SizedBox(height: 10),
+                const SizedBox(height: 26),
 
-                // Chart
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.cardBorder),
-                  ),
+                // Progress Section
+                _buildSectionTitle('YOUR PROGRESS'),
+                const SizedBox(height: 12),
+
+                // Chart Card
+                _buildModernCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Kalori 7 Hari Terakhir', style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.dark)),
-                      const SizedBox(height: 14),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Kalori 7 Hari Terakhir', style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.dark)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text('kcal', style: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.orange)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
                       SizedBox(
-                        height: 120,
+                        height: 140,
                         child: BarChart(BarChartData(
                           alignment: BarChartAlignment.spaceAround,
                           maxY: (weekCal.isEmpty ? 200 : weekCal.reduce((a, b) => a > b ? a : b) + 100).clamp(200, 1000).toDouble(),
@@ -502,8 +555,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   final day = now.subtract(Duration(days: 6 - val.toInt()));
                                   const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
                                   return Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(days[day.weekday - 1], style: GoogleFonts.dmSans(fontSize: 9, color: AppTheme.gray)),
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Text(days[day.weekday - 1], style: GoogleFonts.dmSans(fontSize: 10, color: AppTheme.gray, fontWeight: FontWeight.w500)),
                                   );
                                 },
                               ),
@@ -519,9 +572,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               (i) => BarChartGroupData(x: i, barRods: [
                                     BarChartRodData(
                                       toY: weekCal[i],
-                                      color: i == 6 ? AppTheme.orange : const Color(0xFFFAD38F),
-                                      width: 18,
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
+                                      color: i == 6 ? AppTheme.orange : AppTheme.orange.withOpacity(0.4),
+                                      width: 20,
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
                                     )
                                   ])),
                         )),
@@ -529,36 +582,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
 
-                // Stats
+                // Stats Cards with Icons
                 Row(
                   children: [
-                    _StatCard(value: '${activities.length}', label: 'Workouts'),
+                    _EnhancedStatCard(
+                      icon: Icons.fitness_center_outlined,
+                      value: '${activities.length}',
+                      label: 'Workouts',
+                      color: AppTheme.orange,
+                    ),
                     const SizedBox(width: 10),
-                    _StatCard(value: '$totalCal', label: 'Total Cal'),
+                    _EnhancedStatCard(
+                      icon: Icons.local_fire_department_outlined,
+                      value: '$totalCal',
+                      label: 'Cal Burned',
+                      color: Colors.deepOrange,
+                    ),
                     const SizedBox(width: 10),
-                    _StatCard(value: '${(totalMin / 60).toStringAsFixed(1)}h', label: 'Total Waktu'),
+                    _EnhancedStatCard(
+                      icon: Icons.schedule_outlined,
+                      value: '${(totalMin / 60).toStringAsFixed(1)}h',
+                      label: 'Duration',
+                      color: Colors.blue,
+                    ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 22),
 
-                // Logout
-                OutlinedButton(
-                  onPressed: () async {
-                    await _auth.logout();
-                    if (context.mounted) {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    }
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.orange,
-                    side: const BorderSide(color: AppTheme.orange),
-                    minimumSize: const Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Text('LOGOUT', style: GoogleFonts.dmSans(fontWeight: FontWeight.w700, letterSpacing: 0.5)),
-                ),
+                // Logout Button
+                _buildLogoutButton(context),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -566,31 +621,169 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.dmSans(
+        fontSize: 13,
+        fontWeight: FontWeight.w800,
+        color: AppTheme.dark,
+        letterSpacing: 1.2,
+      ),
+    );
+  }
+
+  Widget _buildModernCard({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4)),
+        ],
+        border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildInputField(TextEditingController controller, String hint, IconData icon) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, size: 18, color: AppTheme.orange),
+        filled: true,
+        fillColor: const Color(0xFFF8F9FA),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppTheme.orange, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        hintStyle: GoogleFonts.dmSans(color: AppTheme.gray, fontWeight: FontWeight.w500),
+      ),
+      style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w500),
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.orange, AppTheme.orange.withOpacity(0.85)],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: AppTheme.orange.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      child: ElevatedButton(
+        onPressed: _savingProfile ? null : _saveProfileDetails,
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(double.infinity, 52),
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: _savingProfile
+            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.save_outlined, size: 18, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text('SIMPAN PROFIL', style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.orange, width: 2),
+      ),
+      child: OutlinedButton(
+        onPressed: () async {
+          await _auth.logout();
+          if (context.mounted) {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          }
+        },
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppTheme.orange,
+          minimumSize: const Size(double.infinity, 52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: Text('LOGOUT', style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 0.5)),
+      ),
+    );
+  }
 }
 
-class _StatCard extends StatelessWidget {
+class _EnhancedStatCard extends StatelessWidget {
+  final IconData icon;
   final String value;
   final String label;
-  const _StatCard({required this.value, required this.label});
+  final Color color;
+
+  const _EnhancedStatCard({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: AppTheme.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.cardBorder),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4)),
+          ],
+          border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
         ),
         child: Column(
           children: [
-            Text(value, style: GoogleFonts.bebasNeue(fontSize: 24, color: AppTheme.dark, letterSpacing: 1)),
-            const SizedBox(height: 2),
-            Text(label, style: GoogleFonts.dmSans(fontSize: 10, color: AppTheme.gray)),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 20, color: color),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              value,
+              style: GoogleFonts.bebasNeue(fontSize: 22, color: AppTheme.dark, letterSpacing: 1),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: GoogleFonts.dmSans(fontSize: 11, color: AppTheme.gray, fontWeight: FontWeight.w600),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
