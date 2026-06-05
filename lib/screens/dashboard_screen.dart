@@ -330,7 +330,9 @@ class _WeeklyChart extends StatelessWidget {
                 if (index < 0 || index >= 7) return const SizedBox();
 
                 final dayDate = now.subtract(Duration(days: 6 - index));
-                final dayLabel = DateFormat.E(Localizations.localeOf(context).toString()).format(dayDate);
+                final dayLabel =
+                    DateFormat.E(Localizations.localeOf(context).toString())
+                        .format(dayDate);
 
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
