@@ -134,7 +134,7 @@ class HistoryScreen extends StatelessWidget {
     final uid = AuthService().userId;
 
     return Scaffold(
-      backgroundColor: AppTheme.lightGray,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: StreamBuilder(
         stream: actSvc.watchBox,
         builder: (context, _) {
@@ -316,9 +316,9 @@ class _ActivityCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppTheme.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.cardBorder),
+          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
         ),
         child: Row(
           children: [
@@ -330,7 +330,7 @@ class _ActivityCard extends StatelessWidget {
                       style: GoogleFonts.dmSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: AppTheme.dark)),
+                          color: Theme.of(context).colorScheme.onSurface)),
                   const SizedBox(height: 3),
                   Text(
                     activity.reps > 0
@@ -350,7 +350,7 @@ class _ActivityCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: labelOrange ? AppTheme.orange : AppTheme.lightGray,
+                      color: labelOrange ? AppTheme.orange : Theme.of(context).brightness == Brightness.dark ? Colors.white10 : AppTheme.lightGray,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(label,

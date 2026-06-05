@@ -108,6 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         context: context,
         barrierDismissible: false,
         builder: (_) => AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16)),
           content: Column(
@@ -125,12 +126,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               Text(
                 'Registrasi Berhasil!',
-                style: GoogleFonts.bebasNeue(fontSize: 22, letterSpacing: 1),
+                style: GoogleFonts.bebasNeue(fontSize: 22, letterSpacing: 1, color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 8),
               Text(
                 'Akun kamu sudah dibuat.\nSilakan login untuk melanjutkan.',
-                style: GoogleFonts.dmSans(fontSize: 13, color: Colors.grey),
+                style: GoogleFonts.dmSans(fontSize: 13, color: AppTheme.gray),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -189,8 +190,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: AppTheme.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // Header orange
@@ -207,7 +209,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(
                   'Create your account',
                   style: GoogleFonts.dmSans(
-                      color: AppTheme.white.withValues(alpha: 0.75), fontSize: 13),
+                      color: Colors.white.withOpacity(0.75), fontSize: 13),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -247,9 +249,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
                       decoration: BoxDecoration(
-                        color: AppTheme.lightGray,
+                        color: isDark ? const Color(0xFF2C2C2C) : AppTheme.lightGray,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFDDDDDD)),
+                        border: Border.all(color: isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -257,7 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Text(_birthDateText,
                               style: GoogleFonts.dmSans(
                                   fontSize: 14,
-                                  color: _birthDate == null ? AppTheme.gray : AppTheme.dark)),
+                                  color: _birthDate == null ? AppTheme.gray : (isDark ? Colors.white : AppTheme.dark))),
                           const Icon(Icons.calendar_month, color: AppTheme.gray, size: 20),
                         ],
                       ),
@@ -270,14 +272,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
                           decoration: BoxDecoration(
-                            color: AppTheme.lightGray,
+                            color: isDark ? const Color(0xFF2C2C2C) : AppTheme.lightGray,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFDDDDDD)),
+                            border: Border.all(color: isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
                           ),
                           child: Text(
                             _birthDate == null ? 'Umur' : '$_age tahun',
                             style: GoogleFonts.dmSans(
-                                fontSize: 14, color: AppTheme.dark),
+                                fontSize: 14, color: isDark ? Colors.white : AppTheme.dark),
                           ),
                         ),
                       ),
@@ -413,18 +415,19 @@ class _GoogleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: loading ? null : onTap,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFDDDDDD)),
+          border: Border.all(color: isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -453,7 +456,7 @@ class _GoogleButton extends StatelessWidget {
                     style: GoogleFonts.dmSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF3C4043),
+                      color: isDark ? Colors.white : const Color(0xFF3C4043),
                     ),
                   ),
                 ],

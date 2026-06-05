@@ -46,25 +46,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final today = _todayActivities;
-    final totalCal = today.fold(0, (s, a) => s + a.calories);
-    final totalMin = today.fold(0, (s, a) => s + a.durationMinutes);
-    final totalReps = today.fold(0, (s, a) => s + a.reps);
-
     return Scaffold(
-      backgroundColor: AppTheme.lightGray,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: StreamBuilder(
         stream: _activityService.watchBox,
         builder: (context, _) {
-          final today2 = _todayActivities;
-          final cal = today2.fold(0, (s, a) => s + a.calories);
-          final min = today2.fold(0, (s, a) => s + a.durationMinutes);
-          final reps = today2.fold(0, (s, a) => s + a.reps);
+          final today = _todayActivities;
+          final cal = today.fold(0, (s, a) => s + a.calories);
+          final min = today.fold(0, (s, a) => s + a.durationMinutes);
+          final reps = today.fold(0, (s, a) => s + a.reps);
 
           return Column(
             children: [
               Container(
-                width: double.infinity, color: AppTheme.orange,
+                width: double.infinity, 
+                color: AppTheme.orange,
                 padding: EdgeInsets.only(
                   top: MediaQuery.of(context).padding.top + 20,
                   left: 20, right: 20, bottom: 20,
@@ -94,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               Expanded(
-                child: today2.isEmpty
+                child: today.isEmpty
                     ? Center(
                         child: Text('Belum ada aktivitas hari ini.',
                             style: GoogleFonts.dmSans(color: AppTheme.gray)))
@@ -104,9 +100,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Text('RECENT ACTIVITIES',
                               style: GoogleFonts.dmSans(
                                   fontSize: 12, fontWeight: FontWeight.w700,
-                                  color: AppTheme.dark, letterSpacing: 0.8)),
+                                  color: Theme.of(context).colorScheme.onSurface, letterSpacing: 0.8)),
                           const SizedBox(height: 10),
-                          ...today2.map((a) => ActivityCard(activity: a, showToday: true)),
+                          ...today.map((a) => ActivityCard(activity: a, showToday: true)),
                         ],
                       ),
               ),

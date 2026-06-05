@@ -5,6 +5,8 @@ import 'add_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
 
+import '../services/theme_service.dart';
+
 class MainNav extends StatefulWidget {
   const MainNav({super.key});
 
@@ -13,8 +15,6 @@ class MainNav extends StatefulWidget {
 }
 
 class _MainNavState extends State<MainNav> {
-  int _currentIndex = 0;
-
   final _screens = const [
     DashboardScreen(),
     AddScreen(),
@@ -24,59 +24,64 @@ class _MainNavState extends State<MainNav> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFEEEEEE), width: 0.5)),
-        ),
-        child: SafeArea(
-          child: SizedBox(
-            height: 60,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home,
-                  label: 'Home',
-                  index: 0,
-                  current: _currentIndex,
-                  onTap: () => setState(() => _currentIndex = 0),
+    return ValueListenableBuilder<int>(
+      valueListenable: ThemeService.navIndexNotifier,
+      builder: (context, currentIndex, _) {
+        return Scaffold(
+          body: IndexedStack(
+            index: currentIndex,
+            children: _screens,
+          ),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 0.5)),
+            ),
+            child: SafeArea(
+              child: SizedBox(
+                height: 60,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _NavItem(
+                      icon: Icons.home_outlined,
+                      activeIcon: Icons.home,
+                      label: 'Home',
+                      index: 0,
+                      current: currentIndex,
+                      onTap: () => ThemeService.setNavIndex(0),
+                    ),
+                    _NavItem(
+                      icon: Icons.add_circle_outline,
+                      activeIcon: Icons.add_circle,
+                      label: 'Add',
+                      index: 1,
+                      current: currentIndex,
+                      onTap: () => ThemeService.setNavIndex(1),
+                    ),
+                    _NavItem(
+                      icon: Icons.history_outlined,
+                      activeIcon: Icons.history,
+                      label: 'History',
+                      index: 2,
+                      current: currentIndex,
+                      onTap: () => ThemeService.setNavIndex(2),
+                    ),
+                    _NavItem(
+                      icon: Icons.person_outline,
+                      activeIcon: Icons.person,
+                      label: 'Profile',
+                      index: 3,
+                      current: currentIndex,
+                      onTap: () => ThemeService.setNavIndex(3),
+                    ),
+                  ],
                 ),
-                _NavItem(
-                  icon: Icons.add_circle_outline,
-                  activeIcon: Icons.add_circle,
-                  label: 'Add',
-                  index: 1,
-                  current: _currentIndex,
-                  onTap: () => setState(() => _currentIndex = 1),
-                ),
-                _NavItem(
-                  icon: Icons.history_outlined,
-                  activeIcon: Icons.history,
-                  label: 'History',
-                  index: 2,
-                  current: _currentIndex,
-                  onTap: () => setState(() => _currentIndex = 2),
-                ),
-                _NavItem(
-                  icon: Icons.person_outline,
-                  activeIcon: Icons.person,
-                  label: 'Profile',
-                  index: 3,
-                  current: _currentIndex,
-                  onTap: () => setState(() => _currentIndex = 3),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -168,7 +168,7 @@ class _AddScreenState extends State<AddScreen> {
         child: Text(text.toUpperCase(),
             style: GoogleFonts.dmSans(
                 fontSize: 12, fontWeight: FontWeight.w800,
-                color: AppTheme.dark, letterSpacing: 1.2)),
+                color: Theme.of(context).colorScheme.onSurface, letterSpacing: 1.2)),
       );
 
   Widget _buildInputField(TextEditingController controller, String hint, IconData icon, {TextInputType keyboardType = TextInputType.text, Function(String)? onChanged}) {
@@ -176,19 +176,19 @@ class _AddScreenState extends State<AddScreen> {
       controller: controller,
       keyboardType: keyboardType,
       onChanged: onChanged,
-      style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w500),
+      style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface),
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, size: 18, color: AppTheme.orange),
         filled: true,
-        fillColor: const Color(0xFFF8F9FA),
+        fillColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF2C2C2C) : const Color(0xFFF8F9FA),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1.5),
+          borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.2), width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1.5),
+          borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.2), width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -203,7 +203,7 @@ class _AddScreenState extends State<AddScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // Gradient Header
@@ -247,10 +247,10 @@ class _AddScreenState extends State<AddScreen> {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
-                      border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+                      border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 1),
                     ),
                     child: Wrap(
                       spacing: 8,
@@ -265,9 +265,9 @@ class _AddScreenState extends State<AddScreen> {
                                   color: selected ? Colors.white : AppTheme.gray)),
                           selected: selected,
                           selectedColor: AppTheme.orange,
-                          backgroundColor: Colors.white,
+                          backgroundColor: Theme.of(context).colorScheme.surface,
                           side: BorderSide(
-                            color: selected ? AppTheme.orange : const Color(0xFFE8E8E8),
+                            color: selected ? AppTheme.orange : Theme.of(context).dividerColor.withOpacity(0.1),
                             width: selected ? 0 : 1.5,
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -290,10 +290,10 @@ class _AddScreenState extends State<AddScreen> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
-                        border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+                        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 1),
                       ),
                       child: Wrap(
                         spacing: 8,
@@ -310,9 +310,9 @@ class _AddScreenState extends State<AddScreen> {
                                     color: selected ? Colors.white : AppTheme.gray)),
                             selected: selected,
                             selectedColor: AppTheme.orange,
-                            backgroundColor: Colors.white,
+                            backgroundColor: Theme.of(context).colorScheme.surface,
                             side: BorderSide(
-                              color: selected ? AppTheme.orange : const Color(0xFFE8E8E8),
+                              color: selected ? AppTheme.orange : Theme.of(context).dividerColor.withOpacity(0.1),
                               width: selected ? 0 : 1.5,
                             ),
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -332,7 +332,7 @@ class _AddScreenState extends State<AddScreen> {
                     const SizedBox(height: 24),
                   ],
 
-                  // Custom Workout Input
+                  // Custom Workout Name
                   _label('Custom Workout Name'),
                   _buildInputField(
                     _workoutCtrl,
@@ -350,10 +350,10 @@ class _AddScreenState extends State<AddScreen> {
                   Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4))],
-                      border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+                      border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 1),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

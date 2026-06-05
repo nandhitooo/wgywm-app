@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/activity_service.dart';
+import '../services/theme_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -83,7 +84,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _pickBirthDate() async {
     final selected = await showDatePicker(
       context: context,
-      initialDate: _birthDate ?? DateTime.now().subtract(const Duration(days: 365 * 18)),
+      initialDate:
+          _birthDate ?? DateTime.now().subtract(const Duration(days: 365 * 18)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
@@ -139,12 +141,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _editName() {
-    final ctrl = TextEditingController(text: _auth.currentUser?.displayName ?? '');
+    final ctrl =
+        TextEditingController(text: _auth.currentUser?.displayName ?? '');
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Ubah Nama', style: GoogleFonts.bebasNeue(fontSize: 20, letterSpacing: 1)),
+        title: Text('Ubah Nama',
+            style: GoogleFonts.bebasNeue(fontSize: 20, letterSpacing: 1)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
@@ -153,7 +157,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: GoogleFonts.dmSans(color: AppTheme.gray)),
+            child:
+                Text('Batal', style: GoogleFonts.dmSans(color: AppTheme.gray)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -174,7 +179,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _pickPhoto() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -183,19 +189,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Container(
               width: 40,
               height: 4,
-              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(height: 16),
-            Text('Pilih Foto Profil', style: GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text('Pilih Foto Profil',
+                style: GoogleFonts.dmSans(
+                    fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
             ListTile(
               leading: Container(
                 width: 44,
                 height: 44,
-                decoration: BoxDecoration(color: AppTheme.orange.withOpacity(0.1), shape: BoxShape.circle),
-                child: const Icon(Icons.photo_library_outlined, color: AppTheme.orange),
+                decoration: BoxDecoration(
+                    color: AppTheme.orange.withOpacity(0.1),
+                    shape: BoxShape.circle),
+                child: const Icon(Icons.photo_library_outlined,
+                    color: AppTheme.orange),
               ),
-              title: Text('Pilih dari Galeri', style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
+              title: Text('Pilih dari Galeri',
+                  style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
               onTap: () {
                 Navigator.pop(context);
                 _uploadPhoto(ImageSource.gallery);
@@ -205,10 +219,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               leading: Container(
                 width: 44,
                 height: 44,
-                decoration: BoxDecoration(color: AppTheme.orange.withOpacity(0.1), shape: BoxShape.circle),
-                child: const Icon(Icons.camera_alt_outlined, color: AppTheme.orange),
+                decoration: BoxDecoration(
+                    color: AppTheme.orange.withOpacity(0.1),
+                    shape: BoxShape.circle),
+                child: const Icon(Icons.camera_alt_outlined,
+                    color: AppTheme.orange),
               ),
-              title: Text('Buka Kamera', style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
+              title: Text('Buka Kamera',
+                  style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
               onTap: () {
                 Navigator.pop(context);
                 _uploadPhoto(ImageSource.camera);
@@ -223,7 +241,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _uploadPhoto(ImageSource source) async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: source, imageQuality: 50, maxWidth: 300);
+    final picked =
+        await picker.pickImage(source: source, imageQuality: 50, maxWidth: 300);
     if (picked == null) return;
 
     setState(() => _uploadingPhoto = true);
@@ -241,7 +260,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           content: Text('$e', style: GoogleFonts.dmSans()),
           backgroundColor: Colors.red.shade600,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ));
       }
     } finally {
@@ -253,13 +273,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       color: Colors.white.withOpacity(0.3),
       child: Center(
-        child: Text(initials, style: GoogleFonts.bebasNeue(color: Colors.white, fontSize: 28, letterSpacing: 1)),
+        child: Text(initials,
+            style: GoogleFonts.bebasNeue(
+                color: Colors.white, fontSize: 28, letterSpacing: 1)),
       ),
     );
   }
 
   double get _bmi {
-    if (_birthDate == null || _weightCtrl.text.isEmpty || _heightCtrl.text.isEmpty) return 0;
+    if (_birthDate == null ||
+        _weightCtrl.text.isEmpty ||
+        _heightCtrl.text.isEmpty) return 0;
     final weight = double.tryParse(_weightCtrl.text) ?? 0;
     final height = double.tryParse(_heightCtrl.text) ?? 0;
     if (weight <= 0 || height <= 0) return 0;
@@ -288,19 +312,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final activities = _actSvc.getAll(_auth.userId);
     final totalCal = activities.fold(0, (s, a) => s + a.calories);
     final totalMin = activities.fold(0, (s, a) => s + a.durationMinutes);
-    final initials = (user?.displayName ?? 'U').split(' ').take(2).map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join();
+    final initials = (user?.displayName ?? 'U')
+        .split(' ')
+        .take(2)
+        .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '')
+        .join();
 
     final now = DateTime.now();
     final weekCal = List.generate(7, (i) {
       final day = now.subtract(Duration(days: 6 - i));
       return activities
-          .where((a) => a.date.year == day.year && a.date.month == day.month && a.date.day == day.day)
+          .where((a) =>
+              a.date.year == day.year &&
+              a.date.month == day.month &&
+              a.date.day == day.day)
           .fold(0, (s, a) => s + a.calories)
           .toDouble();
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // Enhanced Header with Gradient
@@ -312,10 +343,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 end: Alignment.bottomRight,
                 colors: [AppTheme.orange, AppTheme.orange.withOpacity(0.85)],
               ),
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-              boxShadow: [BoxShadow(color: AppTheme.orange.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 10))],
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(24)),
+              boxShadow: [
+                BoxShadow(
+                    color: AppTheme.orange.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10))
+              ],
             ),
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 24, left: 20, right: 20, bottom: 32),
+            padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 24,
+                left: 20,
+                right: 20,
+                bottom: 32),
             child: Column(
               children: [
                 // Avatar
@@ -327,18 +368,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       height: 96,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withOpacity(0.7), width: 4),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 12, spreadRadius: 2)],
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.7), width: 4),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 12,
+                              spreadRadius: 2)
+                        ],
                       ),
                       child: ClipOval(
                         child: _uploadingPhoto
                             ? Container(
                                 color: Colors.white.withOpacity(0.3),
-                                child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                child: const CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2))
                             : (_photoBase64 != null && _photoBase64!.isNotEmpty)
-                                ? Image.memory(base64Decode(_photoBase64!.split(',').last), fit: BoxFit.cover)
+                                ? Image.memory(
+                                    base64Decode(_photoBase64!.split(',').last),
+                                    fit: BoxFit.cover)
                                 : (_photoUrl != null && _photoUrl!.isNotEmpty)
-                                    ? Image.network(_photoUrl!, fit: BoxFit.cover)
+                                    ? Image.network(_photoUrl!,
+                                        fit: BoxFit.cover)
                                     : _avatarFallback(initials),
                       ),
                     ),
@@ -350,9 +401,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8)],
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 8)
+                          ],
                         ),
-                        child: const Icon(Icons.camera_alt_outlined, size: 16, color: AppTheme.orange),
+                        child: const Icon(Icons.camera_alt_outlined,
+                            size: 16, color: AppTheme.orange),
                       ),
                     ),
                   ],
@@ -364,18 +420,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _savingName
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2))
                         : Text(
                             user?.displayName ?? 'User',
-                            style: GoogleFonts.bebasNeue(color: Colors.white, fontSize: 28, letterSpacing: 1.2),
+                            style: GoogleFonts.bebasNeue(
+                                color: Colors.white,
+                                fontSize: 28,
+                                letterSpacing: 1.2),
                           ),
                     const SizedBox(width: 10),
                     GestureDetector(
                       onTap: _editName,
                       child: Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.25), borderRadius: BorderRadius.circular(8)),
-                        child: const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
+                        decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.edit_outlined,
+                            size: 16, color: Colors.white),
                       ),
                     ),
                   ],
@@ -383,7 +449,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 4),
                 Text(
                   user?.email ?? '',
-                  style: GoogleFonts.dmSans(color: Colors.white.withOpacity(0.8), fontSize: 13, fontWeight: FontWeight.w500),
+                  style: GoogleFonts.dmSans(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -401,23 +470,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Tanggal Lahir', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text('Tanggal Lahir',
+                          style: GoogleFonts.dmSans(
+                              color: AppTheme.gray,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600)),
                       const SizedBox(height: 10),
                       GestureDetector(
                         onTap: _pickBirthDate,
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 16),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF8F9FA),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE8E8E8), width: 1.5),
+                            border: Border.all(
+                                color: const Color(0xFFE8E8E8), width: 1.5),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.calendar_today_outlined, size: 16, color: AppTheme.orange),
+                              const Icon(Icons.calendar_today_outlined,
+                                  size: 16, color: AppTheme.orange),
                               const SizedBox(width: 10),
-                              Text(_birthDateText, style: GoogleFonts.dmSans(fontSize: 14, color: _birthDate == null ? AppTheme.gray : AppTheme.dark, fontWeight: FontWeight.w500)),
+                              Text(_birthDateText,
+                                  style: GoogleFonts.dmSans(
+                                      fontSize: 14,
+                                      color: _birthDate == null
+                                          ? AppTheme.gray
+                                          : AppTheme.dark,
+                                      fontWeight: FontWeight.w500)),
                             ],
                           ),
                         ),
@@ -429,23 +511,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Umur', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontWeight: FontWeight.w600)),
+                                Text('Umur',
+                                    style: GoogleFonts.dmSans(
+                                        color: AppTheme.gray,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
                                 const SizedBox(height: 10),
                                 Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 14, horizontal: 16),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF8F9FA),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFE8E8E8), width: 1.5),
+                                    border: Border.all(
+                                        color: const Color(0xFFE8E8E8),
+                                        width: 1.5),
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.person_outline, size: 16, color: AppTheme.orange),
+                                      const Icon(Icons.person_outline,
+                                          size: 16, color: AppTheme.orange),
                                       const SizedBox(width: 10),
                                       Text(
-                                        _birthDate == null ? '-' : '$_age tahun',
-                                        style: GoogleFonts.dmSans(fontSize: 14, color: AppTheme.dark, fontWeight: FontWeight.w500),
+                                        _birthDate == null
+                                            ? '-'
+                                            : '$_age tahun',
+                                        style: GoogleFonts.dmSans(
+                                            fontSize: 14,
+                                            color: AppTheme.dark,
+                                            fontWeight: FontWeight.w500),
                                       ),
                                     ],
                                   ),
@@ -458,18 +553,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Berat (kg)', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontWeight: FontWeight.w600)),
+                                Text('Berat (kg)',
+                                    style: GoogleFonts.dmSans(
+                                        color: AppTheme.gray,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600)),
                                 const SizedBox(height: 10),
-                                _buildInputField(_weightCtrl, '70', Icons.monitor_weight_outlined),
+                                _buildInputField(_weightCtrl, '70',
+                                    Icons.monitor_weight_outlined),
                               ],
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 18),
-                      Text('Tinggi Badan (cm)', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text('Tinggi Badan (cm)',
+                          style: GoogleFonts.dmSans(
+                              color: AppTheme.gray,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600)),
                       const SizedBox(height: 10),
-                      _buildInputField(_heightCtrl, '170', Icons.straighten_outlined),
+                      _buildInputField(
+                          _heightCtrl, '170', Icons.straighten_outlined),
                       const SizedBox(height: 18),
 
                       // BMI Display
@@ -479,7 +584,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             color: _bmiColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _bmiColor.withOpacity(0.3)),
+                            border:
+                                Border.all(color: _bmiColor.withOpacity(0.3)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -487,23 +593,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('BMI', style: GoogleFonts.dmSans(color: AppTheme.gray, fontSize: 11, fontWeight: FontWeight.w600)),
+                                  Text('BMI',
+                                      style: GoogleFonts.dmSans(
+                                          color: AppTheme.gray,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600)),
                                   const SizedBox(height: 4),
                                   Text(
                                     _bmi.toStringAsFixed(1),
-                                    style: GoogleFonts.bebasNeue(fontSize: 20, color: _bmiColor, letterSpacing: 1),
+                                    style: GoogleFonts.bebasNeue(
+                                        fontSize: 20,
+                                        color: _bmiColor,
+                                        letterSpacing: 1),
                                   ),
                                 ],
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: _bmiColor,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   _bmiStatus,
-                                  style: GoogleFonts.dmSans(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                                  style: GoogleFonts.dmSans(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700),
                                 ),
                               ),
                             ],
@@ -529,14 +646,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Kalori 7 Hari Terakhir', style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.dark)),
+                          Text('Kalori 7 Hari Terakhir',
+                              style: GoogleFonts.dmSans(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.dark)),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: AppTheme.orange.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text('kcal', style: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.orange)),
+                            child: Text('kcal',
+                                style: GoogleFonts.dmSans(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.orange)),
                           ),
                         ],
                       ),
@@ -545,25 +671,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         height: 140,
                         child: BarChart(BarChartData(
                           alignment: BarChartAlignment.spaceAround,
-                          maxY: (weekCal.isEmpty ? 200 : weekCal.reduce((a, b) => a > b ? a : b) + 100).clamp(200, 1000).toDouble(),
+                          maxY: (weekCal.isEmpty
+                                  ? 200
+                                  : weekCal.reduce((a, b) => a > b ? a : b) +
+                                      100)
+                              .clamp(200, 1000)
+                              .toDouble(),
                           barTouchData: BarTouchData(enabled: false),
                           titlesData: FlTitlesData(
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (val, _) {
-                                  final day = now.subtract(Duration(days: 6 - val.toInt()));
-                                  const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+                                  final day = now.subtract(
+                                      Duration(days: 6 - val.toInt()));
+                                  const days = [
+                                    'Sen',
+                                    'Sel',
+                                    'Rab',
+                                    'Kam',
+                                    'Jum',
+                                    'Sab',
+                                    'Min'
+                                  ];
                                   return Padding(
                                     padding: const EdgeInsets.only(top: 8),
-                                    child: Text(days[day.weekday - 1], style: GoogleFonts.dmSans(fontSize: 10, color: AppTheme.gray, fontWeight: FontWeight.w500)),
+                                    child: Text(days[day.weekday - 1],
+                                        style: GoogleFonts.dmSans(
+                                            fontSize: 10,
+                                            color: AppTheme.gray,
+                                            fontWeight: FontWeight.w500)),
                                   );
                                 },
                               ),
                             ),
-                            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            leftTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                            topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                            rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
                           ),
                           borderData: FlBorderData(show: false),
                           gridData: const FlGridData(show: false),
@@ -572,9 +719,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               (i) => BarChartGroupData(x: i, barRods: [
                                     BarChartRodData(
                                       toY: weekCal[i],
-                                      color: i == 6 ? AppTheme.orange : AppTheme.orange.withOpacity(0.4),
+                                      color: i == 6
+                                          ? AppTheme.orange
+                                          : AppTheme.orange.withOpacity(0.4),
                                       width: 20,
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                                      borderRadius: const BorderRadius.vertical(
+                                          top: Radius.circular(8)),
                                     )
                                   ])),
                         )),
@@ -611,6 +761,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 22),
 
+                // Settings Section
+                _buildSectionTitle('SETTINGS'),
+                const SizedBox(height: 12),
+                _buildModernCard(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppTheme.orange.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        ThemeService.isDarkMode
+                            ? Icons.dark_mode_outlined
+                            : Icons.light_mode_outlined,
+                        color: AppTheme.orange,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      'Dark Mode',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    trailing: Switch(
+                      value: ThemeService.isDarkMode,
+                      activeColor: AppTheme.orange,
+                      onChanged: (val) {
+                        ThemeService.toggleTheme();
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 22),
+
                 // Logout Button
                 _buildLogoutButton(context),
                 const SizedBox(height: 20),
@@ -628,7 +818,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       style: GoogleFonts.dmSans(
         fontSize: 13,
         fontWeight: FontWeight.w800,
-        color: AppTheme.dark,
+        color: Theme.of(context).colorScheme.onSurface,
         letterSpacing: 1.2,
       ),
     );
@@ -638,18 +828,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 4)),
         ],
-        border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+        border: Border.all(
+            color: Theme.of(context).dividerColor.withOpacity(0.1), width: 1),
       ),
       child: child,
     );
   }
 
-  Widget _buildInputField(TextEditingController controller, String hint, IconData icon) {
+  Widget _buildInputField(
+      TextEditingController controller, String hint, IconData icon) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
@@ -657,23 +852,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
         hintText: hint,
         prefixIcon: Icon(icon, size: 18, color: AppTheme.orange),
         filled: true,
-        fillColor: const Color(0xFFF8F9FA),
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF2C2C2C)
+            : const Color(0xFFF8F9FA),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1.5),
+          borderSide: BorderSide(
+              color: Theme.of(context).dividerColor.withOpacity(0.2),
+              width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE8E8E8), width: 1.5),
+          borderSide: BorderSide(
+              color: Theme.of(context).dividerColor.withOpacity(0.2),
+              width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppTheme.orange, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        hintStyle: GoogleFonts.dmSans(color: AppTheme.gray, fontWeight: FontWeight.w500),
+        hintStyle: GoogleFonts.dmSans(
+            color: AppTheme.gray, fontWeight: FontWeight.w500),
       ),
-      style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w500),
+      style: GoogleFonts.dmSans(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Theme.of(context).colorScheme.onSurface),
     );
   }
 
@@ -685,7 +890,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           colors: [AppTheme.orange, AppTheme.orange.withOpacity(0.85)],
         ),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: AppTheme.orange.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+              color: AppTheme.orange.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4))
+        ],
       ),
       child: ElevatedButton(
         onPressed: _savingProfile ? null : _saveProfileDetails,
@@ -693,16 +903,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
           minimumSize: const Size(double.infinity, 52),
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: _savingProfile
-            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                    color: Colors.white, strokeWidth: 2.5))
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.save_outlined, size: 18, color: Colors.white),
+                  const Icon(Icons.save_outlined,
+                      size: 18, color: Colors.white),
                   const SizedBox(width: 8),
-                  Text('SIMPAN PROFIL', style: GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.5)),
+                  Text('SIMPAN PROFIL',
+                      style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.5)),
                 ],
               ),
       ),
@@ -725,9 +946,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.orange,
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        child: Text('LOGOUT', style: GoogleFonts.dmSans(fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 0.5)),
+        child: Text('LOGOUT',
+            style: GoogleFonts.dmSans(
+                fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 0.5)),
       ),
     );
   }
@@ -752,12 +976,16 @@ class _EnhancedStatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16, offset: const Offset(0, 4)),
+            BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 16,
+                offset: const Offset(0, 4)),
           ],
-          border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+          border: Border.all(
+              color: Theme.of(context).dividerColor.withOpacity(0.1), width: 1),
         ),
         child: Column(
           children: [
@@ -773,12 +1001,18 @@ class _EnhancedStatCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               value,
-              style: GoogleFonts.bebasNeue(fontSize: 22, color: AppTheme.dark, letterSpacing: 1),
+              style: GoogleFonts.bebasNeue(
+                  fontSize: 22,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  letterSpacing: 1),
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: GoogleFonts.dmSans(fontSize: 11, color: AppTheme.gray, fontWeight: FontWeight.w600),
+              style: GoogleFonts.dmSans(
+                  fontSize: 11,
+                  color: AppTheme.gray,
+                  fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -786,4 +1020,3 @@ class _EnhancedStatCard extends StatelessWidget {
     );
   }
 }
-

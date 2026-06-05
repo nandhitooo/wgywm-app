@@ -10,6 +10,8 @@ import 'theme/app_theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_nav.dart';
 
+import 'services/theme_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -17,6 +19,7 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(ActivityAdapter());
   await ActivityService.init();
+  await ThemeService.init();
 
   // Inisialisasi Firebase
   await Firebase.initializeApp(
@@ -40,25 +43,32 @@ class WGymApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final authService = AuthService();
 
-    return MaterialApp(
-      title: 'W-GYM',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.theme,
-      home: StreamBuilder(
-        stream: authService.authStateChanges,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              backgroundColor: Color(0xFFF5A623),
-              body: Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-            );
-          }
-          if (snapshot.hasData) return const MainNav();
-          return const LoginScreen();
-        },
-      ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeService.themeNotifier,
+      builder: (_, mode, __) {
+        return MaterialApp(
+          title: 'W-GYM',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: mode,
+          home: StreamBuilder(
+            stream: authService.authStateChanges,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  backgroundColor: Color(0xFFF5A623),
+                  body: Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                );
+              }
+              if (snapshot.hasData) return const MainNav();
+              return const LoginScreen();
+            },
+          ),
+        );
+      },
     );
   }
 }
