@@ -5,6 +5,7 @@ import 'dashboard_screen.dart';
 import 'add_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
+import 'package:wgym/l10n/app_localizations.dart';
 
 import '../services/theme_service.dart';
 
@@ -62,7 +63,7 @@ class _MainNavState extends State<MainNav> {
                 _NavItem(
                   icon: Icons.grid_view_outlined,
                   activeIcon: Icons.grid_view_rounded,
-                  label: 'Dash',
+                  label: AppLocalizations.of(context)!.dash,
                   index: 0,
                   current: currentIndex,
                   onTap: () => ThemeService.setNavIndex(0),
@@ -70,7 +71,7 @@ class _MainNavState extends State<MainNav> {
                 _NavItem(
                   icon: Icons.add_box_outlined,
                   activeIcon: Icons.add_box_rounded,
-                  label: 'Add',
+                  label: AppLocalizations.of(context)!.add,
                   index: 1,
                   current: currentIndex,
                   onTap: () => ThemeService.setNavIndex(1),
@@ -78,7 +79,7 @@ class _MainNavState extends State<MainNav> {
                 _NavItem(
                   icon: Icons.leaderboard_outlined,
                   activeIcon: Icons.leaderboard_rounded,
-                  label: 'Stats',
+                  label: AppLocalizations.of(context)!.stats,
                   index: 2,
                   current: currentIndex,
                   onTap: () => ThemeService.setNavIndex(2),
@@ -86,7 +87,7 @@ class _MainNavState extends State<MainNav> {
                 _NavItem(
                   icon: Icons.person_outline_rounded,
                   activeIcon: Icons.person_rounded,
-                  label: 'Profile',
+                  label: AppLocalizations.of(context)!.profile,
                   index: 3,
                   current: currentIndex,
                   onTap: () => ThemeService.setNavIndex(3),

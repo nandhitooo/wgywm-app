@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../models/activity.dart';
 import '../services/activity_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/activity_card.dart';
+import 'package:wgym/l10n/app_localizations.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -72,15 +74,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return h > 0 ? '${h}h ${m}m' : '${m}m';
   }
 
-  String _getGreeting() {
+  String _getGreeting(AppLocalizations l10n) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return l10n.goodMorning;
+    if (hour < 17) return l10n.goodAfternoon;
+    return l10n.goodEvening;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: StreamBuilder(
@@ -124,7 +127,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(_getGreeting(),
+                              Text(_getGreeting(l10n),
                                   style: GoogleFonts.dmSans(
                                       color: Colors.white.withOpacity(0.8),
                                       fontSize: 14,
@@ -165,7 +168,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               children: [
                                 _StatItem(
                                     value: '$cal',
-                                    label: 'kCal',
+                                    label: l10n.kCal,
                                     icon: Icons.local_fire_department),
                                 Container(
                                     width: 1,
@@ -173,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     color: Colors.white.withOpacity(0.2)),
                                 _StatItem(
                                     value: _formatTime(min),
-                                    label: 'Time',
+                                    label: l10n.time,
                                     icon: Icons.timer),
                                 Container(
                                     width: 1,
@@ -181,7 +184,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     color: Colors.white.withOpacity(0.2)),
                                 _StatItem(
                                     value: '$reps',
-                                    label: 'Reps',
+                                    label: l10n.reps,
                                     icon: Icons.fitness_center),
                               ],
                             ),
@@ -198,7 +201,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('WEEKLY PROGRESS',
+                      Text(l10n.weeklyProgress,
                           style: GoogleFonts.dmSans(
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
@@ -219,14 +222,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('RECENT ACTIVITIES',
+                          Text(l10n.recentActivities,
                               style: GoogleFonts.dmSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   color:
                                       Theme.of(context).colorScheme.onSurface,
                                   letterSpacing: 1)),
-                          Text('See All',
+                          Text(l10n.seeAll,
                               style: GoogleFonts.dmSans(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -248,7 +251,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 size: 64,
                                 color: AppTheme.gray.withOpacity(0.2)),
                             const SizedBox(height: 16),
-                            Text('No activities yet today.',
+                            Text(l10n.noActivitiesToday,
                                 style: GoogleFonts.dmSans(
                                     color: AppTheme.gray,
                                     fontWeight: FontWeight.w500)),
@@ -322,26 +325,17 @@ class _WeeklyChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
                 final now = DateTime.now();
                 final index = value.toInt();
                 if (index < 0 || index >= 7) return const SizedBox();
 
                 final dayDate = now.subtract(Duration(days: 6 - index));
-                final dayLabel = [
-                  'Mon',
-                  'Tue',
-                  'Wed',
-                  'Thu',
-                  'Fri',
-                  'Sat',
-                  'Sun'
-                ][dayDate.weekday - 1];
+                final dayLabel = DateFormat.E(Localizations.localeOf(context).toString()).format(dayDate);
 
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
-                    dayLabel.substring(0, 1),
+                    dayLabel.substring(0, 1).toUpperCase(),
                     style: GoogleFonts.dmSans(
                       color: AppTheme.gray,
                       fontSize: 10,

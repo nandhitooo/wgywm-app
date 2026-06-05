@@ -28,10 +28,7 @@ class AuthService {
       );
       await credential.user?.updateDisplayName(name);
       // Simpan ke Firestore
-      await _firestore
-          .collection('users')
-          .doc(credential.user?.uid)
-          .set({
+      await _firestore.collection('users').doc(credential.user?.uid).set({
         'displayName': name,
         'email': email,
         'birthDate': birthDate,
@@ -85,10 +82,7 @@ class AuthService {
       final userCredential = await _auth.signInWithCredential(credential);
 
       // Simpan data ke Firestore
-      await _firestore
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .set({
+      await _firestore.collection('users').doc(userCredential.user?.uid).set({
         'displayName': userCredential.user?.displayName ?? '',
         'email': userCredential.user?.email ?? '',
         'photoUrl': userCredential.user?.photoURL ?? '',
@@ -150,7 +144,19 @@ class AuthService {
 
   // ─── Update data profil tambahan ──────────────────────────────────────────
   Future<void> updateProfileData(Map<String, dynamic> data) async {
-    await _firestore.collection('users').doc(userId).set(data, SetOptions(merge: true));
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .set(data, SetOptions(merge: true));
+  }
+
+  // ─── Reset Password ────────────────────────────────────────────────────────
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _authErrorMessage(e.code);
+    }
   }
 
   // ─── Pesan error ─────────────────────────────────────────────────────────

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'register_screen.dart';
+import 'package:wgym/l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,8 +28,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_emailCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) {
-      _showError('Semua kolom harus diisi.');
+      _showError(l10n.bahasaIndonesia == 'Bahasa Indonesia'
+          ? 'Semua kolom harus diisi.'
+          : 'All fields are required.');
       return;
     }
     setState(() => _loading = true);
@@ -74,6 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
@@ -83,7 +88,8 @@ class _LoginScreenState extends State<LoginScreen> {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: AppTheme.primaryGradient,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(32)),
               boxShadow: [
                 BoxShadow(
                   color: AppTheme.orange.withOpacity(0.3),
@@ -94,22 +100,24 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top + 48,
-              left: 32, right: 32, bottom: 48,
+              left: 32,
+              right: 32,
+              bottom: 48,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'WELCOME BACK',
+                  l10n.welcomeBack,
                   style: GoogleFonts.dmSans(
-                      color: Colors.white.withOpacity(0.8), 
+                      color: Colors.white.withOpacity(0.8),
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 2),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Login to your\nAccount',
+                  l10n.loginToAccount,
                   style: GoogleFonts.bebasNeue(
                       color: Colors.white,
                       fontSize: 48,
@@ -129,9 +137,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      hintText: 'Email Address',
-                      prefixIcon: Icon(Icons.email_outlined, size: 20),
+                    decoration: InputDecoration(
+                      hintText: l10n.emailAddress,
+                      prefixIcon: const Icon(Icons.email_outlined, size: 20),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -139,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passCtrl,
                     obscureText: _obscure,
                     decoration: InputDecoration(
-                      hintText: 'Password',
+                      hintText: l10n.password,
                       prefixIcon: const Icon(Icons.lock_outline, size: 20),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -175,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(
                                   color: Colors.white, strokeWidth: 2))
-                          : const Text('LOGIN'),
+                          : Text(l10n.login),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -186,9 +194,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Expanded(child: Divider()),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('OR CONTINUE WITH',
+                        child: Text(l10n.orContinueWith,
                             style: GoogleFonts.dmSans(
-                                color: AppTheme.gray, 
+                                color: AppTheme.gray,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1)),
@@ -210,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Don\'t have an account? ',
+                        l10n.dontHaveAccount,
                         style: GoogleFonts.dmSans(
                             color: AppTheme.gray, fontSize: 14),
                       ),
@@ -221,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               builder: (_) => const RegisterScreen()),
                         ),
                         child: Text(
-                          'Register',
+                          l10n.register,
                           style: GoogleFonts.dmSans(
                               color: AppTheme.orange,
                               fontSize: 14,
@@ -249,6 +257,7 @@ class _GoogleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: loading ? null : onTap,
@@ -258,7 +267,9 @@ class _GoogleButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
+          border: Border.all(
+              color:
+                  isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -286,7 +297,7 @@ class _GoogleButton extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'Continue with Google',
+                    l10n.continueWithGoogle,
                     style: GoogleFonts.dmSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

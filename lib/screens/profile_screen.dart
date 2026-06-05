@@ -9,6 +9,8 @@ import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/activity_service.dart';
 import '../services/theme_service.dart';
+import '../services/language_service.dart';
+import 'package:wgym/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -27,7 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _savingName = false;
   bool _savingProfile = false;
   String? _photoBase64;
-  String? _photoUrl; // Tambahan untuk menyimpan URL dari Google
+  String? _photoUrl;
 
   @override
   void initState() {
@@ -46,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         setState(() {
           _photoBase64 = data['photoBase64'];
-          _photoUrl = data['photoUrl']; // Ambil photoUrl dari Firestore
+          _photoUrl = data['photoUrl'];
           _birthDate = birthDate;
           _weightCtrl.text = data['weight']?.toString() ?? '';
           _heightCtrl.text = data['height']?.toString() ?? '';
@@ -63,7 +65,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String get _birthDateText {
-    if (_birthDate == null) return 'Pilih tanggal lahir';
+    final l10n = AppLocalizations.of(context)!;
+    if (_birthDate == null) {
+      return l10n.pickBirthDate;
+    }
     final y = _birthDate!.year.toString();
     final m = _birthDate!.month.toString().padLeft(2, '0');
     final d = _birthDate!.day.toString().padLeft(2, '0');
@@ -101,16 +106,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveProfileDetails() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_birthDate == null) {
-      _showSnack('Silakan pilih tanggal lahir.', isError: true);
+      _showSnack(l10n.pickBirthDate, isError: true);
       return;
     }
     if (_weightCtrl.text.trim().isEmpty) {
-      _showSnack('Silakan masukkan berat badan.', isError: true);
+      _showSnack(l10n.allFieldsRequired, isError: true);
       return;
     }
     if (_heightCtrl.text.trim().isEmpty) {
-      _showSnack('Silakan masukkan tinggi badan.', isError: true);
+      _showSnack(l10n.allFieldsRequired, isError: true);
       return;
     }
 
@@ -122,10 +129,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'height': _heightCtrl.text.trim(),
       });
       if (mounted) {
-        _showSnack('Data profil berhasil disimpan!');
+        _showSnack(l10n.activitySaved);
       }
     } catch (e) {
-      _showSnack('Gagal menyimpan data profil: $e', isError: true);
+      _showSnack('${l10n.failedToSave}: $e', isError: true);
     } finally {
       if (mounted) setState(() => _savingProfile = false);
     }
@@ -141,24 +148,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _editName() {
+    final l10n = AppLocalizations.of(context)!;
     final ctrl =
         TextEditingController(text: _auth.currentUser?.displayName ?? '');
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Ubah Nama',
+        title: Text(l10n.changeName,
             style: GoogleFonts.bebasNeue(fontSize: 20, letterSpacing: 1)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Nama baru'),
+          decoration: InputDecoration(hintText: l10n.newName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child:
-                Text('Batal', style: GoogleFonts.dmSans(color: AppTheme.gray)),
+            child: Text(l10n.cancel,
+                style: GoogleFonts.dmSans(color: AppTheme.gray)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -169,7 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (mounted) setState(() => _savingName = false);
             },
             style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-            child: Text('Simpan', style: GoogleFonts.dmSans()),
+            child: Text(l10n.save, style: GoogleFonts.dmSans()),
           ),
         ],
       ),
@@ -177,6 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _pickPhoto() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -194,7 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(height: 16),
-            Text('Pilih Foto Profil',
+            Text(l10n.pickProfilePhoto,
                 style: GoogleFonts.dmSans(
                     fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 12),
@@ -208,7 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: const Icon(Icons.photo_library_outlined,
                     color: AppTheme.orange),
               ),
-              title: Text('Pilih dari Galeri',
+              title: Text(l10n.pickFromGallery,
                   style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
               onTap: () {
                 Navigator.pop(context);
@@ -225,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: const Icon(Icons.camera_alt_outlined,
                     color: AppTheme.orange),
               ),
-              title: Text('Buka Kamera',
+              title: Text(l10n.openCamera,
                   style: GoogleFonts.dmSans(fontWeight: FontWeight.w500)),
               onTap: () {
                 Navigator.pop(context);
@@ -251,18 +260,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() {
           _photoBase64 = url;
-          _photoUrl = null; // Reset Google photo jika user upload manual
+          _photoUrl = null;
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('$e', style: GoogleFonts.dmSans()),
-          backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ));
+        _showSnack('$e', isError: true);
       }
     } finally {
       if (mounted) setState(() => _uploadingPhoto = false);
@@ -312,6 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final activities = _actSvc.getAll(_auth.userId);
     final totalCal = activities.fold(0, (s, a) => s + a.calories);
     final totalMin = activities.fold(0, (s, a) => s + a.durationMinutes);
+    final l10n = AppLocalizations.of(context)!;
     final initials = (user?.displayName ?? 'U')
         .split(' ')
         .take(2)
@@ -334,7 +338,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
-          // Enhanced Header with Gradient
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -359,7 +362,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 bottom: 32),
             child: Column(
               children: [
-                // Avatar
                 Stack(
                   alignment: Alignment.bottomRight,
                   children: [
@@ -414,8 +416,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-
-                // Nama + edit
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -457,20 +457,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-
-          // Body
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               children: [
-                // Profile Details Section
-                _buildSectionTitle('PROFILE DETAILS'),
+                _buildSectionTitle(l10n.profileDetails.toUpperCase()),
                 const SizedBox(height: 12),
                 _buildModernCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Tanggal Lahir',
+                      Text(l10n.birthDate,
                           style: GoogleFonts.dmSans(
                               color: AppTheme.gray,
                               fontSize: 12,
@@ -483,10 +480,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           padding: const EdgeInsets.symmetric(
                               vertical: 14, horizontal: 16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8F9FA),
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? const Color(0xFF2C2C2C)
+                                    : const Color(0xFFF8F9FA),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color: const Color(0xFFE8E8E8), width: 1.5),
+                                color: Theme.of(context)
+                                    .dividerColor
+                                    .withOpacity(0.1),
+                                width: 1.5),
                           ),
                           child: Row(
                             children: [
@@ -498,7 +501,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       fontSize: 14,
                                       color: _birthDate == null
                                           ? AppTheme.gray
-                                          : AppTheme.dark,
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
                                       fontWeight: FontWeight.w500)),
                             ],
                           ),
@@ -511,7 +516,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Umur',
+                                Text(l10n.age,
                                     style: GoogleFonts.dmSans(
                                         color: AppTheme.gray,
                                         fontSize: 12,
@@ -522,10 +527,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 14, horizontal: 16),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF8F9FA),
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xFF2C2C2C)
+                                        : const Color(0xFFF8F9FA),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                        color: const Color(0xFFE8E8E8),
+                                        color: Theme.of(context)
+                                            .dividerColor
+                                            .withOpacity(0.1),
                                         width: 1.5),
                                   ),
                                   child: Row(
@@ -536,10 +546,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       Text(
                                         _birthDate == null
                                             ? '-'
-                                            : '$_age tahun',
+                                            : '$_age ${l10n.years}',
                                         style: GoogleFonts.dmSans(
                                             fontSize: 14,
-                                            color: AppTheme.dark,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
                                             fontWeight: FontWeight.w500),
                                       ),
                                     ],
@@ -553,7 +565,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Berat (kg)',
+                                Text(l10n.weight + ' (kg)',
                                     style: GoogleFonts.dmSans(
                                         color: AppTheme.gray,
                                         fontSize: 12,
@@ -567,7 +579,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                       const SizedBox(height: 18),
-                      Text('Tinggi Badan (cm)',
+                      Text(l10n.height + ' (cm)',
                           style: GoogleFonts.dmSans(
                               color: AppTheme.gray,
                               fontSize: 12,
@@ -576,8 +588,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildInputField(
                           _heightCtrl, '170', Icons.straighten_outlined),
                       const SizedBox(height: 18),
-
-                      // BMI Display
                       if (_bmi > 0)
                         Container(
                           padding: const EdgeInsets.all(14),
@@ -626,19 +636,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                         ),
-
                       const SizedBox(height: 18),
-                      _buildSaveButton(),
+                      _buildSaveButton(l10n),
                     ],
                   ),
                 ),
                 const SizedBox(height: 26),
-
-                // Progress Section
-                _buildSectionTitle('YOUR PROGRESS'),
+                _buildSectionTitle(l10n.yourProgress.toUpperCase()),
                 const SizedBox(height: 12),
-
-                // Chart Card
                 _buildModernCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -646,11 +651,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Kalori 7 Hari Terakhir',
+                          Text(l10n.caloriesLast7Days,
                               style: GoogleFonts.dmSans(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  color: AppTheme.dark)),
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface)),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 6),
@@ -685,18 +691,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 getTitlesWidget: (val, _) {
                                   final day = now.subtract(
                                       Duration(days: 6 - val.toInt()));
-                                  const days = [
-                                    'Sen',
-                                    'Sel',
-                                    'Rab',
-                                    'Kam',
-                                    'Jum',
-                                    'Sab',
-                                    'Min'
-                                  ];
+                                  final dayLabel = [
+                                    'Mon',
+                                    'Tue',
+                                    'Wed',
+                                    'Thu',
+                                    'Fri',
+                                    'Sat',
+                                    'Sun'
+                                  ][day.weekday - 1];
                                   return Padding(
                                     padding: const EdgeInsets.only(top: 8),
-                                    child: Text(days[day.weekday - 1],
+                                    child: Text(dayLabel.substring(0, 1),
                                         style: GoogleFonts.dmSans(
                                             fontSize: 10,
                                             color: AppTheme.gray,
@@ -733,8 +739,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Stats Cards with Icons
                 Row(
                   children: [
                     _EnhancedStatCard(
@@ -747,7 +751,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _EnhancedStatCard(
                       icon: Icons.local_fire_department_outlined,
                       value: '$totalCal',
-                      label: 'Cal Burned',
+                      label: l10n.kCal,
                       color: Colors.deepOrange,
                     ),
                     const SizedBox(width: 10),
@@ -760,52 +764,221 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 22),
-
-                // Settings Section
-                _buildSectionTitle('SETTINGS'),
+                _buildSectionTitle(l10n.settings.toUpperCase()),
                 const SizedBox(height: 12),
                 _buildModernCard(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppTheme.orange.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppTheme.orange.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            ThemeService.isDarkMode
+                                ? Icons.dark_mode_outlined
+                                : Icons.light_mode_outlined,
+                            color: AppTheme.orange,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          l10n.darkMode,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        trailing: Switch(
+                          value: ThemeService.isDarkMode,
+                          activeColor: AppTheme.orange,
+                          onChanged: (val) {
+                            ThemeService.toggleTheme();
+                          },
+                        ),
                       ),
-                      child: Icon(
-                        ThemeService.isDarkMode
-                            ? Icons.dark_mode_outlined
-                            : Icons.light_mode_outlined,
-                        color: AppTheme.orange,
-                        size: 20,
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Divider(height: 1),
                       ),
-                    ),
-                    title: Text(
-                      'Dark Mode',
-                      style: GoogleFonts.dmSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.language_outlined,
+                            color: Colors.green,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          l10n.changeLanguage,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ValueListenableBuilder<Locale>(
+                                valueListenable: LanguageService.localeNotifier,
+                                builder: (context, locale, _) {
+                                  return Text(
+                                    locale.languageCode == 'en'
+                                        ? 'English'
+                                        : 'Bahasa',
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 12,
+                                      color: AppTheme.gray,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  );
+                                }),
+                            const Icon(Icons.chevron_right,
+                                color: AppTheme.gray),
+                          ],
+                        ),
+                        onTap: _showLanguageDialog,
                       ),
-                    ),
-                    trailing: Switch(
-                      value: ThemeService.isDarkMode,
-                      activeColor: AppTheme.orange,
-                      onChanged: (val) {
-                        ThemeService.toggleTheme();
-                      },
-                    ),
+                      if (user?.providerData
+                              .any((p) => p.providerId == 'password') ??
+                          false) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Divider(height: 1),
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.lock_reset_outlined,
+                              color: Colors.blue,
+                              size: 20,
+                            ),
+                          ),
+                          title: Text(
+                            l10n.resetPassword,
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          trailing: const Icon(Icons.chevron_right,
+                              color: AppTheme.gray),
+                          onTap: _showResetPasswordConfirm,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 const SizedBox(height: 22),
-
-                // Logout Button
-                _buildLogoutButton(context),
-                const SizedBox(height: 20),
+                _buildLogoutButton(context, l10n.logout),
+                const SizedBox(height: 100),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(l10n.changeLanguage,
+            style: GoogleFonts.bebasNeue(fontSize: 22, letterSpacing: 1)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(l10n.english, style: GoogleFonts.dmSans()),
+              leading: Radio<String>(
+                value: 'en',
+                groupValue: LanguageService.currentLanguageCode,
+                activeColor: AppTheme.orange,
+                onChanged: (val) {
+                  LanguageService.setLocale('en');
+                  Navigator.pop(context);
+                },
+              ),
+              onTap: () {
+                LanguageService.setLocale('en');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text(l10n.bahasaIndonesia, style: GoogleFonts.dmSans()),
+              leading: Radio<String>(
+                value: 'id',
+                groupValue: LanguageService.currentLanguageCode,
+                activeColor: AppTheme.orange,
+                onChanged: (val) {
+                  LanguageService.setLocale('id');
+                  Navigator.pop(context);
+                },
+              ),
+              onTap: () {
+                LanguageService.setLocale('id');
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showResetPasswordConfirm() {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(l10n.resetPassword,
+            style: GoogleFonts.bebasNeue(fontSize: 22, letterSpacing: 1)),
+        content: Text(
+          l10n.resetPasswordConfirmMsg(_auth.currentUser?.email ?? ''),
+          style: GoogleFonts.dmSans(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel,
+                style: GoogleFonts.dmSans(color: AppTheme.gray)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _auth.resetPassword(_auth.currentUser?.email ?? '');
+                _showSnack(l10n.resetPasswordEmailSent);
+              } catch (e) {
+                _showSnack('${l10n.failedToSave}: $e', isError: true);
+              }
+            },
+            child: Text(l10n.send, style: GoogleFonts.dmSans()),
           ),
         ],
       ),
@@ -882,7 +1055,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -918,7 +1091,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const Icon(Icons.save_outlined,
                       size: 18, color: Colors.white),
                   const SizedBox(width: 8),
-                  Text('SIMPAN PROFIL',
+                  Text(l10n.saveProfile,
                       style: GoogleFonts.dmSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -930,7 +1103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context) {
+  Widget _buildLogoutButton(BuildContext context, String label) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -949,7 +1122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        child: Text('LOGOUT',
+        child: Text(label.toUpperCase(),
             style: GoogleFonts.dmSans(
                 fontWeight: FontWeight.w800, fontSize: 14, letterSpacing: 0.5)),
       ),

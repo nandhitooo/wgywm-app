@@ -5,14 +5,17 @@ import '../theme/app_theme.dart';
 import '../models/activity.dart';
 import '../services/activity_service.dart';
 import '../services/auth_service.dart';
+import 'package:wgym/l10n/app_localizations.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
-  Map<String, List<Activity>> _groupByDate(List<Activity> activities) {
+  Map<String, List<Activity>> _groupByDate(
+      List<Activity> activities, String locale) {
     final map = <String, List<Activity>>{};
+    final format = DateFormat('MMMM d, yyyy', locale);
     for (final a in activities) {
-      final key = DateFormat('MMMM d, yyyy').format(a.date);
+      final key = format.format(a.date);
       map.putIfAbsent(key, () => []).add(a);
     }
     return map;
@@ -20,6 +23,7 @@ class HistoryScreen extends StatelessWidget {
 
   // Dialog edit aktivitas
   void _showEditDialog(BuildContext context, Activity activity) {
+    final l10n = AppLocalizations.of(context)!;
     final namCtrl = TextEditingController(text: activity.name);
     final durCtrl =
         TextEditingController(text: activity.durationMinutes.toString());
@@ -31,7 +35,7 @@ class HistoryScreen extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Edit Aktivitas',
+        title: Text(l10n.editActivity,
             style: GoogleFonts.bebasNeue(fontSize: 20, letterSpacing: 1)),
         content: SingleChildScrollView(
           child: Column(
@@ -39,26 +43,25 @@ class HistoryScreen extends StatelessWidget {
             children: [
               TextField(
                 controller: namCtrl,
-                decoration: const InputDecoration(labelText: 'Nama Workout'),
+                decoration: InputDecoration(labelText: l10n.workoutName),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: durCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Durasi (menit)'),
+                decoration: InputDecoration(labelText: l10n.durationMinutes),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: calCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Kalori'),
+                decoration: InputDecoration(labelText: l10n.calories),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: repsCtrl,
                 keyboardType: TextInputType.number,
-                decoration:
-                    const InputDecoration(labelText: 'Reps (0 jika tidak ada)'),
+                decoration: InputDecoration(labelText: l10n.repsOptional),
               ),
             ],
           ),
@@ -66,8 +69,8 @@ class HistoryScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child:
-                Text('Batal', style: GoogleFonts.dmSans(color: AppTheme.gray)),
+            child: Text(l10n.cancel,
+                style: GoogleFonts.dmSans(color: AppTheme.gray)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -86,7 +89,7 @@ class HistoryScreen extends StatelessWidget {
               if (context.mounted) Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-            child: Text('Simpan', style: GoogleFonts.dmSans()),
+            child: Text(l10n.save, style: GoogleFonts.dmSans()),
           ),
         ],
       ),
@@ -95,22 +98,23 @@ class HistoryScreen extends StatelessWidget {
 
   // Dialog konfirmasi hapus
   void _showDeleteDialog(BuildContext context, Activity activity) {
+    final l10n = AppLocalizations.of(context)!;
     final actSvc = ActivityService();
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Hapus Aktivitas',
+        title: Text(l10n.deleteActivity,
             style: GoogleFonts.bebasNeue(fontSize: 20, letterSpacing: 1)),
         content: Text(
-          'Hapus "${activity.name}"?\nData tidak bisa dikembalikan.',
+          l10n.deleteConfirmation(activity.name),
           style: GoogleFonts.dmSans(fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child:
-                Text('Batal', style: GoogleFonts.dmSans(color: AppTheme.gray)),
+            child: Text(l10n.cancel,
+                style: GoogleFonts.dmSans(color: AppTheme.gray)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -121,7 +125,7 @@ class HistoryScreen extends StatelessWidget {
               backgroundColor: Colors.red.shade600,
               minimumSize: const Size(80, 40),
             ),
-            child: Text('Hapus', style: GoogleFonts.dmSans()),
+            child: Text(l10n.delete, style: GoogleFonts.dmSans()),
           ),
         ],
       ),
@@ -130,8 +134,10 @@ class HistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final actSvc = ActivityService();
     final uid = AuthService().userId;
+    final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -139,10 +145,11 @@ class HistoryScreen extends StatelessWidget {
         stream: actSvc.watchBox,
         builder: (context, _) {
           final activities = actSvc.getAll(uid);
-          final grouped = _groupByDate(activities);
-          final now = DateFormat('MMMM d, yyyy').format(DateTime.now());
-          final yesterday = DateFormat('MMMM d, yyyy')
-              .format(DateTime.now().subtract(const Duration(days: 1)));
+          final grouped = _groupByDate(activities, locale);
+          final format = DateFormat('MMMM d, yyyy', locale);
+          final now = format.format(DateTime.now());
+          final yesterday =
+              format.format(DateTime.now().subtract(const Duration(days: 1)));
 
           return Column(
             children: [
@@ -159,12 +166,12 @@ class HistoryScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Your workout log',
+                    Text(l10n.logYourWorkout,
                         style: GoogleFonts.dmSans(
                             color: Colors.white.withOpacity(0.75),
                             fontSize: 13)),
                     const SizedBox(height: 4),
-                    Text('HISTORY ACTIVITIES',
+                    Text(l10n.historyActivities,
                         style: GoogleFonts.bebasNeue(
                             color: Colors.white,
                             fontSize: 30,
@@ -184,7 +191,7 @@ class HistoryScreen extends StatelessWidget {
                                 size: 56,
                                 color: AppTheme.gray.withOpacity(0.4)),
                             const SizedBox(height: 12),
-                            Text('Belum ada aktivitas.',
+                            Text(l10n.noActivities,
                                 style:
                                     GoogleFonts.dmSans(color: AppTheme.gray)),
                           ],
@@ -251,13 +258,14 @@ class _ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     String label = '';
     bool labelOrange = false;
     if (isToday) {
-      label = 'Today';
+      label = l10n.today;
       labelOrange = true;
     } else if (isYesterday) {
-      label = 'Yesterday';
+      label = l10n.yesterday;
     }
 
     return Dismissible(
@@ -275,7 +283,7 @@ class _ActivityCard extends StatelessWidget {
           children: [
             const Icon(Icons.edit, color: Colors.white),
             const SizedBox(width: 8),
-            Text('Edit',
+            Text(l10n.edit,
                 style: GoogleFonts.dmSans(
                     color: Colors.white, fontWeight: FontWeight.w600)),
           ],
@@ -293,7 +301,7 @@ class _ActivityCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text('Hapus',
+            Text(l10n.delete,
                 style: GoogleFonts.dmSans(
                     color: Colors.white, fontWeight: FontWeight.w600)),
             const SizedBox(width: 8),
@@ -318,7 +326,8 @@ class _ActivityCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          border: Border.all(
+              color: Theme.of(context).dividerColor.withOpacity(0.1)),
         ),
         child: Row(
           children: [
@@ -350,7 +359,11 @@ class _ActivityCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: labelOrange ? AppTheme.orange : Theme.of(context).brightness == Brightness.dark ? Colors.white10 : AppTheme.lightGray,
+                      color: labelOrange
+                          ? AppTheme.orange
+                          : Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white10
+                              : AppTheme.lightGray,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(label,

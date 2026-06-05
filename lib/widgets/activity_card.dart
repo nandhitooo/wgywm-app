@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../models/activity.dart';
+import 'package:wgym/l10n/app_localizations.dart';
 
 class ActivityCard extends StatelessWidget {
   final Activity activity;
@@ -35,13 +36,14 @@ class ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     String label = '';
     Color labelColor = AppTheme.orange;
     if (showToday) {
-      label = 'Today';
+      label = l10n.today;
     } else if (showYesterday) {
-      label = 'Yesterday';
+      label = l10n.yesterday;
       labelColor = AppTheme.gray;
     }
 

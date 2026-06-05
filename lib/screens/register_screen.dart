@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
+import 'package:wgym/l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -37,22 +38,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   String get _birthDateText {
-    if (_birthDate == null) return 'Pilih tanggal lahir';
+    if (_birthDate == null) return AppLocalizations.of(context)!.pickBirthDate;
     final y = _birthDate!.year.toString();
     final m = _birthDate!.month.toString().padLeft(2, '0');
     final d = _birthDate!.day.toString().padLeft(2, '0');
     return '$d/$m/$y';
-  }
-
-  int get _age {
-    if (_birthDate == null) return 0;
-    final today = DateTime.now();
-    var age = today.year - _birthDate!.year;
-    if (today.month < _birthDate!.month ||
-        (today.month == _birthDate!.month && today.day < _birthDate!.day)) {
-      age -= 1;
-    }
-    return age;
   }
 
   Future<void> _pickBirthDate() async {
@@ -74,17 +64,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_nameCtrl.text.trim().isEmpty ||
         _emailCtrl.text.trim().isEmpty ||
         _passCtrl.text.trim().isEmpty ||
         _birthDate == null ||
         _weightCtrl.text.trim().isEmpty ||
         _heightCtrl.text.trim().isEmpty) {
-      _showError('Semua kolom harus diisi.');
+      _showError(l10n.allFieldsRequired);
       return;
     }
     if (_passCtrl.text != _retypeCtrl.text) {
-      _showError('Password tidak cocok.');
+      _showError(l10n.passwordNotMatch);
       return;
     }
     setState(() => _loading = true);
@@ -109,8 +100,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         barrierDismissible: false,
         builder: (_) => AlertDialog(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -125,12 +116,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Registrasi Berhasil!',
-                style: GoogleFonts.bebasNeue(fontSize: 22, letterSpacing: 1, color: Theme.of(context).colorScheme.onSurface),
+                l10n.registrationSuccess,
+                style: GoogleFonts.bebasNeue(
+                    fontSize: 22,
+                    letterSpacing: 1,
+                    color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 8),
               Text(
-                'Akun kamu sudah dibuat.\nSilakan login untuk melanjutkan.',
+                l10n.accountCreatedLogin,
                 style: GoogleFonts.dmSans(fontSize: 13, color: AppTheme.gray),
                 textAlign: TextAlign.center,
               ),
@@ -139,7 +133,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('LOGIN SEKARANG'),
+                  child: Text(l10n.loginNow),
                 ),
               ),
             ],
@@ -183,13 +177,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       content: Text(msg, style: GoogleFonts.dmSans()),
       backgroundColor: Colors.red.shade600,
       behavior: SnackBarBehavior.floating,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -200,7 +194,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: AppTheme.primaryGradient,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(32)),
               boxShadow: [
                 BoxShadow(
                   color: AppTheme.orange.withOpacity(0.3),
@@ -211,22 +206,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top + 48,
-              left: 32, right: 32, bottom: 48,
+              left: 32,
+              right: 32,
+              bottom: 48,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'JOIN US TODAY',
+                  l10n.joinUsToday,
                   style: GoogleFonts.dmSans(
-                      color: Colors.white.withOpacity(0.8), 
+                      color: Colors.white.withOpacity(0.8),
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 2),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Register Your\nAccount',
+                  l10n.registerYourAccount,
                   style: GoogleFonts.bebasNeue(
                       color: Colors.white,
                       fontSize: 48,
@@ -245,18 +242,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   TextField(
                     controller: _nameCtrl,
-                    decoration: const InputDecoration(
-                      hintText: 'Full Name',
-                      prefixIcon: Icon(Icons.person_outline, size: 20),
+                    decoration: InputDecoration(
+                      hintText: l10n.fullName,
+                      prefixIcon: const Icon(Icons.person_outline, size: 20),
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      hintText: 'Email Address',
-                      prefixIcon: Icon(Icons.email_outlined, size: 20),
+                    decoration: InputDecoration(
+                      hintText: l10n.emailAddress,
+                      prefixIcon: const Icon(Icons.email_outlined, size: 20),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -264,11 +261,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onTap: _pickBirthDate,
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 20),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF242424) : const Color(0xFFFBFBFB),
+                        color: isDark
+                            ? const Color(0xFF242424)
+                            : const Color(0xFFFBFBFB),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: isDark ? const Color(0xFF333333) : const Color(0xFFEBEBEB)),
+                        border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF333333)
+                                : const Color(0xFFEBEBEB)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -276,8 +279,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Text(_birthDateText,
                               style: GoogleFonts.dmSans(
                                   fontSize: 14,
-                                  color: _birthDate == null ? AppTheme.gray : (isDark ? Colors.white : AppTheme.dark))),
-                          const Icon(Icons.calendar_month_outlined, color: AppTheme.orange, size: 20),
+                                  color: _birthDate == null
+                                      ? AppTheme.gray
+                                      : (isDark
+                                          ? Colors.white
+                                          : AppTheme.dark))),
+                          const Icon(Icons.calendar_month_outlined,
+                              color: AppTheme.orange, size: 20),
                         ],
                       ),
                     ),
@@ -289,9 +297,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: TextField(
                           controller: _weightCtrl,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            hintText: 'Weight (kg)',
-                            prefixIcon: Icon(Icons.monitor_weight_outlined, size: 20),
+                          decoration: InputDecoration(
+                            hintText: l10n.weight + ' (kg)',
+                            prefixIcon: const Icon(
+                                Icons.monitor_weight_outlined,
+                                size: 20),
                           ),
                         ),
                       ),
@@ -300,9 +310,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: TextField(
                           controller: _heightCtrl,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            hintText: 'Height (cm)',
-                            prefixIcon: Icon(Icons.height_outlined, size: 20),
+                          decoration: InputDecoration(
+                            hintText: l10n.height + ' (cm)',
+                            prefixIcon:
+                                const Icon(Icons.height_outlined, size: 20),
                           ),
                         ),
                       ),
@@ -313,7 +324,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passCtrl,
                     obscureText: _obscure1,
                     decoration: InputDecoration(
-                      hintText: 'Password',
+                      hintText: l10n.password,
                       prefixIcon: const Icon(Icons.lock_outline, size: 20),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -332,7 +343,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _retypeCtrl,
                     obscureText: _obscure2,
                     decoration: InputDecoration(
-                      hintText: 'Retype Password',
+                      hintText: l10n.retypePassword,
                       prefixIcon: const Icon(Icons.lock_reset, size: 20),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -368,7 +379,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               width: 20,
                               child: CircularProgressIndicator(
                                   color: Colors.white, strokeWidth: 2))
-                          : const Text('REGISTER'),
+                          : Text(l10n.register.toUpperCase()),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -385,14 +396,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account? ',
+                        l10n.alreadyHaveAccount,
                         style: GoogleFonts.dmSans(
                             color: AppTheme.gray, fontSize: 14),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Text(
-                          'Login',
+                          l10n.login,
                           style: GoogleFonts.dmSans(
                               color: AppTheme.orange,
                               fontSize: 14,
@@ -421,6 +432,7 @@ class _GoogleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: loading ? null : onTap,
@@ -430,7 +442,9 @@ class _GoogleButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
+          border: Border.all(
+              color:
+                  isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -458,7 +472,7 @@ class _GoogleButton extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'Continue with Google',
+                    l10n.continueWithGoogle,
                     style: GoogleFonts.dmSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

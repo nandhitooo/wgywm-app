@@ -1,6 +1,6 @@
 # 🏋️ W-GYM — Workout Tracker App
 
-> Aplikasi pencatatan aktivitas gym berbasis Flutter dengan desain modern dan sinkronisasi offline-first menggunakan Hive dan Firebase Firestore.
+> Aplikasi pencatatan aktivitas gym berbasis Flutter dengan desain modern, sinkronisasi offline-first menggunakan Hive dan Firebase Firestore, serta dukungan multi-bahasa.
 
 ---
 
@@ -15,27 +15,28 @@
 - **Modern UI/UX** — Desain premium dengan gradien, bayangan lembut, dan tata letak modern.
 - **Visualisasi Data** — Grafik progres kalori mingguan yang interaktif menggunakan `fl_chart`.
 - **Autentikasi Pengguna** — Login & Register dengan email/password atau Google Sign-In.
-- **Catat Aktivitas** — Input latihan dengan kategori yang mudah digunakan dan kalkulasi kalori otomatis.
+- **Catat Aktivitas** — Input latihan dengan kategori yang mudah digunakan dan kalkulasi kalori otomatis berdasarkan MET values dan berat badan.
+- **Multi-Bahasa (Localization)** — Dukungan penuh untuk bahasa **English** dan **Bahasa Indonesia** yang dapat diganti melalui pengaturan.
 - **Dashboard Cerdas** — Ringkasan harian dengan salam dinamis dan statistik yang disinkronkan.
-- **Riwayat Aktivitas** — Histori latihan lengkap dengan ikon cerdas berdasarkan jenis latihan.
+- **Riwayat Aktivitas** — Histori latihan lengkap dengan fitur edit/hapus (swipe gesture) dan ikon cerdas.
 - **Offline Support** — Data tersimpan lokal menggunakan Hive, tetap berfungsi tanpa internet.
 - **Auto Sync** — Sinkronisasi otomatis ke Firestore saat koneksi tersedia.
-- **Profil Pengguna** — Manajemen profil lengkap termasuk foto profil (Base64), BMI, dan pengaturan Dark Mode.
+- **Profil Pengguna** — Manajemen profil lengkap termasuk foto profil, kalkulasi BMI otomatis, dan pengaturan Dark Mode.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Kategori | Library / Tool |
-|---|---|
-| Framework | Flutter (SDK ≥ 3.0.0) |
-| UI & Font | Google Fonts, fl_chart |
-| Local DB | Hive, Hive Flutter |
-| Cloud DB | Firebase Firestore |
-| Auth | Firebase Auth, Google Sign-In |
-| Connectivity | connectivity_plus |
-| Code Gen | build_runner, hive_generator |
-| Utils | intl, uuid, image_picker |
+| Kategori     | Library / Tool                                   |
+| ------------ | ------------------------------------------------ |
+| Framework    | Flutter (SDK ≥ 3.0.0)                            |
+| UI & Font    | Google Fonts, fl_chart                           |
+| Local DB     | Hive, Hive Flutter                               |
+| Cloud DB     | Firebase Firestore                               |
+| Auth         | Firebase Auth, Google Sign-In                    |
+| Connectivity | connectivity_plus                                |
+| Code Gen     | build_runner, hive_generator, flutter_gen (l10n) |
+| Utils        | intl, uuid, image_picker                         |
 
 ---
 
@@ -46,15 +47,19 @@ wgywm-app/
 ├── android/                    # Konfigurasi platform Android
 ├── assets/                     # Aset gambar dan icon
 ├── lib/
-│   ├── main.dart               # Entry point aplikasi
+│   ├── main.dart               # Entry point aplikasi & inisialisasi layanan
 │   ├── firebase_options.dart   # Konfigurasi Firebase (auto-generated)
+│   ├── l10n/                   # File lokalisasi (.arb) & generated code
+│   │   ├── app_en.arb          # Terjemahan Bahasa Inggris
+│   │   └── app_id.arb          # Terjemahan Bahasa Indonesia
 │   ├── models/
 │   │   ├── activity.dart       # Model data Activity
 │   │   └── activity.g.dart     # Hive adapter (generated)
 │   ├── services/
 │   │   ├── auth_service.dart   # Layanan Firebase Auth & Profile
 │   │   ├── activity_service.dart # Layanan Hive & Firestore Sync
-│   │   └── theme_service.dart  # Layanan manajemen tema & navigasi
+│   │   ├── theme_service.dart  # Layanan manajemen tema & navigasi
+│   │   └── language_service.dart # Layanan manajemen bahasa & persistensi
 │   ├── screens/
 │   │   ├── login_screen.dart   # Autentikasi Login
 │   │   ├── register_screen.dart # Registrasi Akun Baru
@@ -62,13 +67,15 @@ wgywm-app/
 │   │   ├── dashboard_screen.dart # Ringkasan Progres & Grafik
 │   │   ├── add_screen.dart     # Form Input Aktivitas
 │   │   ├── history_screen.dart # Histori Aktivitas Lengkap
-│   │   └── profile_screen.dart # Profil & Pengaturan
+│   │   └── profile_screen.dart # Profil & Pengaturan Bahasa/Tema
 │   ├── widgets/
 │   │   └── activity_card.dart  # Komponen Kartu Aktivitas Ikonik
+│   ├── theme/
+│   │   └── app_theme.dart      # Definisi Tema Modern (Light/Dark)
 │   └── theme/
-│       └── app_theme.dart      # Definisi Tema Modern (Light/Dark)
 ├── web/                        # Konfigurasi platform Web
 ├── windows/                    # Konfigurasi platform Windows
+├── l10n.yaml                   # Konfigurasi Flutter Localization
 ├── pubspec.yaml                # Manajemen Dependency
 └── firebase.json               # Konfigurasi Firebase
 ```
@@ -97,28 +104,37 @@ Buka app baru     → Mengunduh data terbaru dari Firestore ke Hive
 ### Langkah-langkah
 
 **1. Clone repository**
+
 ```bash
 git clone https://github.com/nandhitooo/wgywm-app.git
 cd wgywm-app
 ```
 
 **2. Install dependencies**
+
 ```bash
 flutter pub get
 ```
 
 **3. Konfigurasi Firebase**
 Jalankan perintah berikut untuk mengonfigurasi Firebase:
+
 ```bash
 flutterfire configure
 ```
 
-**4. Generate Hive adapter**
+**4. Generate Hive adapter & Localization**
+
 ```bash
-dart run build_runner build
+# Generate Hive models
+dart run build_runner build --delete-conflicting-outputs
+
+# Generate Localization files
+flutter gen-l10n
 ```
 
 **5. Jalankan aplikasi**
+
 ```bash
 flutter run
 ```
@@ -128,6 +144,7 @@ flutter run
 ## 🎨 Design System
 
 Aplikasi ini menggunakan sistem desain yang konsisten:
+
 - **Primary Color:** Orange (`#F5A623`) dengan gradien ke Dark Orange.
 - **Typography:** `DM Sans` untuk keterbacaan tinggi dan `Bebas Neue` untuk aksen judul yang sporty.
 - **Components:** Card dengan radius 16-24px, bayangan lembut, dan indikator aktif yang intuitif.

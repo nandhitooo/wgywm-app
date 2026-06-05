@@ -1,19 +1,21 @@
 name: wgym
 description: W-GYM - Workout Tracker App
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
 
   # UI & Fonts
   google_fonts: ^6.1.0
   fl_chart: ^0.66.2
-  intl: ^0.19.0
+  intl: ^0.20.2
 
   # Local Database (offline)
   hive: ^2.2.3
@@ -42,6 +44,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/
@@ -51,5 +54,5 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#F5A623" 
+  adaptive_icon_background: "#F5A623"
   adaptive_icon_foreground: "assets/icon.png"
