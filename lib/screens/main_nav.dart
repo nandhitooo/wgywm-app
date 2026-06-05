@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
 import 'add_screen.dart';
@@ -24,60 +25,73 @@ class _MainNavState extends State<MainNav> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ValueListenableBuilder<int>(
       valueListenable: ThemeService.navIndexNotifier,
       builder: (context, currentIndex, _) {
         return Scaffold(
+          extendBody: true,
           body: IndexedStack(
             index: currentIndex,
             children: _screens,
           ),
           bottomNavigationBar: Container(
+            margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+            height: 70,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-              border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1), width: 0.5)),
-            ),
-            child: SafeArea(
-              child: SizedBox(
-                height: 60,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _NavItem(
-                      icon: Icons.home_outlined,
-                      activeIcon: Icons.home,
-                      label: 'Home',
-                      index: 0,
-                      current: currentIndex,
-                      onTap: () => ThemeService.setNavIndex(0),
-                    ),
-                    _NavItem(
-                      icon: Icons.add_circle_outline,
-                      activeIcon: Icons.add_circle,
-                      label: 'Add',
-                      index: 1,
-                      current: currentIndex,
-                      onTap: () => ThemeService.setNavIndex(1),
-                    ),
-                    _NavItem(
-                      icon: Icons.history_outlined,
-                      activeIcon: Icons.history,
-                      label: 'History',
-                      index: 2,
-                      current: currentIndex,
-                      onTap: () => ThemeService.setNavIndex(2),
-                    ),
-                    _NavItem(
-                      icon: Icons.person_outline,
-                      activeIcon: Icons.person,
-                      label: 'Profile',
-                      index: 3,
-                      current: currentIndex,
-                      onTap: () => ThemeService.setNavIndex(3),
-                    ),
-                  ],
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
+              ],
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.black.withOpacity(0.02),
+                width: 1,
               ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(
+                  icon: Icons.grid_view_outlined,
+                  activeIcon: Icons.grid_view_rounded,
+                  label: 'Dash',
+                  index: 0,
+                  current: currentIndex,
+                  onTap: () => ThemeService.setNavIndex(0),
+                ),
+                _NavItem(
+                  icon: Icons.add_box_outlined,
+                  activeIcon: Icons.add_box_rounded,
+                  label: 'Add',
+                  index: 1,
+                  current: currentIndex,
+                  onTap: () => ThemeService.setNavIndex(1),
+                ),
+                _NavItem(
+                  icon: Icons.leaderboard_outlined,
+                  activeIcon: Icons.leaderboard_rounded,
+                  label: 'Stats',
+                  index: 2,
+                  current: currentIndex,
+                  onTap: () => ThemeService.setNavIndex(2),
+                ),
+                _NavItem(
+                  icon: Icons.person_outline_rounded,
+                  activeIcon: Icons.person_rounded,
+                  label: 'Profile',
+                  index: 3,
+                  current: currentIndex,
+                  onTap: () => ThemeService.setNavIndex(3),
+                ),
+              ],
             ),
           ),
         );
@@ -109,25 +123,34 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 72,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color:
+              isActive ? AppTheme.orange.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               isActive ? activeIcon : icon,
               color: isActive ? AppTheme.orange : AppTheme.gray,
               size: 24,
             ),
-            const SizedBox(height: 3),
-            Container(
-              width: 5,
-              height: 5,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isActive ? AppTheme.orange : Colors.transparent,
+            if (isActive) ...[
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: GoogleFonts.dmSans(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.orange,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

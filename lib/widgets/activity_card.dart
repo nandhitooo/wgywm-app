@@ -15,70 +15,158 @@ class ActivityCard extends StatelessWidget {
     this.showYesterday = false,
   });
 
+  IconData _getIcon(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('run')) return Icons.directions_run;
+    if (n.contains('cycl') || n.contains('bike')) return Icons.directions_bike;
+    if (n.contains('swim')) return Icons.pool;
+    if (n.contains('push up')) return Icons.fitness_center;
+    if (n.contains('sit up')) return Icons.accessibility_new;
+    if (n.contains('yoga') || n.contains('stretch'))
+      return Icons.self_improvement;
+    if (n.contains('football') || n.contains('soccer'))
+      return Icons.sports_soccer;
+    if (n.contains('badminton')) return Icons.sports_tennis;
+    if (n.contains('hike')) return Icons.terrain;
+    if (n.contains('jump rope')) return Icons.reorder;
+    if (n.contains('stair')) return Icons.stairs;
+    return Icons.fitness_center;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     String label = '';
-    Color labelColor = AppTheme.gray;
+    Color labelColor = AppTheme.orange;
     if (showToday) {
       label = 'Today';
-      labelColor = AppTheme.orange;
     } else if (showYesterday) {
       label = 'Yesterday';
       labelColor = AppTheme.gray;
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppTheme.softShadow,
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.black.withOpacity(0.02),
+          width: 1,
+        ),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  activity.name,
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).colorScheme.onSurface,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              Container(
+                width: 6,
+                color: showToday
+                    ? AppTheme.orange
+                    : AppTheme.gray.withOpacity(0.3),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: (showToday ? AppTheme.orange : AppTheme.gray)
+                      .withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _getIcon(activity.name),
+                  color: showToday ? AppTheme.orange : AppTheme.gray,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        activity.name.toUpperCase(),
+                        style: GoogleFonts.dmSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: Theme.of(context).colorScheme.onSurface,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.schedule,
+                              size: 12, color: AppTheme.gray.withOpacity(0.7)),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${activity.durationMinutes} min',
+                            style: GoogleFonts.dmSans(
+                                fontSize: 11,
+                                color: AppTheme.gray,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(width: 12),
+                          Icon(Icons.local_fire_department_outlined,
+                              size: 12, color: AppTheme.gray.withOpacity(0.7)),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${activity.calories} kcal',
+                            style: GoogleFonts.dmSans(
+                                fontSize: 11,
+                                color: AppTheme.gray,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          if (activity.reps > 0) ...[
+                            const SizedBox(width: 12),
+                            Icon(Icons.repeat,
+                                size: 12,
+                                color: AppTheme.gray.withOpacity(0.7)),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${activity.reps} reps',
+                              style: GoogleFonts.dmSans(
+                                  fontSize: 11,
+                                  color: AppTheme.gray,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  activity.reps > 0
-                      ? '${activity.durationMinutes} min · ${activity.calories} cal · ${activity.reps} reps'
-                      : '${activity.durationMinutes} min · ${activity.calories} cal',
-                  style: GoogleFonts.dmSans(
-                    fontSize: 11,
-                    color: AppTheme.gray,
+              ),
+              if (label.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: labelColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      label,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: labelColor,
+                      ),
+                    ),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
-          if (label.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: showToday ? AppTheme.orange : Theme.of(context).brightness == Brightness.dark ? Colors.white10 : AppTheme.lightGray,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                label,
-                style: GoogleFonts.dmSans(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: showToday ? Colors.white : AppTheme.gray,
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

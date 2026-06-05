@@ -195,30 +195,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
-          // Header orange
+          // Header with Gradient
           Container(
             width: double.infinity,
-            color: AppTheme.orange,
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.orange.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
             padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 32,
-              left: 24, right: 24, bottom: 32,
+              top: MediaQuery.of(context).padding.top + 48,
+              left: 32, right: 32, bottom: 48,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Create your account',
+                  'JOIN US TODAY',
                   style: GoogleFonts.dmSans(
-                      color: Colors.white.withOpacity(0.75), fontSize: 13),
+                      color: Colors.white.withOpacity(0.8), 
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   'Register Your\nAccount',
                   style: GoogleFonts.bebasNeue(
                       color: Colors.white,
-                      fontSize: 42,
-                      letterSpacing: 1.5,
-                      height: 1.05),
+                      fontSize: 48,
+                      letterSpacing: 1,
+                      height: 1),
                 ),
               ],
             ),
@@ -227,31 +240,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // Form
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
               child: Column(
                 children: [
-                  const SizedBox(height: 8),
                   TextField(
                     controller: _nameCtrl,
-                    decoration:
-                        const InputDecoration(hintText: 'Your Name'),
+                    decoration: const InputDecoration(
+                      hintText: 'Full Name',
+                      prefixIcon: Icon(Icons.person_outline, size: 20),
+                    ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(hintText: 'Email'),
+                    decoration: const InputDecoration(
+                      hintText: 'Email Address',
+                      prefixIcon: Icon(Icons.email_outlined, size: 20),
+                    ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   GestureDetector(
                     onTap: _pickBirthDate,
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2C2C2C) : AppTheme.lightGray,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
+                        color: isDark ? const Color(0xFF242424) : const Color(0xFFFBFBFB),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: isDark ? const Color(0xFF333333) : const Color(0xFFEBEBEB)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -260,51 +277,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               style: GoogleFonts.dmSans(
                                   fontSize: 14,
                                   color: _birthDate == null ? AppTheme.gray : (isDark ? Colors.white : AppTheme.dark))),
-                          const Icon(Icons.calendar_month, color: AppTheme.gray, size: 20),
+                          const Icon(Icons.calendar_month_outlined, color: AppTheme.orange, size: 20),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF2C2C2C) : AppTheme.lightGray,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: isDark ? const Color(0xFF3E3E3E) : const Color(0xFFDDDDDD)),
-                          ),
-                          child: Text(
-                            _birthDate == null ? 'Umur' : '$_age tahun',
-                            style: GoogleFonts.dmSans(
-                                fontSize: 14, color: isDark ? Colors.white : AppTheme.dark),
+                        child: TextField(
+                          controller: _weightCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            hintText: 'Weight (kg)',
+                            prefixIcon: Icon(Icons.monitor_weight_outlined, size: 20),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
-                          controller: _weightCtrl,
+                          controller: _heightCtrl,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(hintText: 'Berat (kg)'),
+                          decoration: const InputDecoration(
+                            hintText: 'Height (cm)',
+                            prefixIcon: Icon(Icons.height_outlined, size: 20),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-                  TextField(
-                    controller: _heightCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(hintText: 'Tinggi (cm)'),
-                  ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: _passCtrl,
                     obscureText: _obscure1,
                     decoration: InputDecoration(
-                      hintText: 'Enter Password',
+                      hintText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline, size: 20),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure1
@@ -313,17 +323,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: AppTheme.gray,
                           size: 20,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscure1 = !_obscure1),
+                        onPressed: () => setState(() => _obscure1 = !_obscure1),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: _retypeCtrl,
                     obscureText: _obscure2,
                     decoration: InputDecoration(
                       hintText: 'Retype Password',
+                      prefixIcon: const Icon(Icons.lock_reset, size: 20),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure2
@@ -332,70 +342,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: AppTheme.gray,
                           size: 20,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscure2 = !_obscure2),
+                        onPressed: () => setState(() => _obscure2 = !_obscure2),
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Register Button
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.orange.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _register,
+                      child: _loading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2))
+                          : const Text('REGISTER'),
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  // Tombol Register
-                  ElevatedButton(
-                    onPressed: _loading ? null : _register,
-                    child: _loading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
-                        : const Text('REGISTER'),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Divider OR
-                  Row(
-                    children: [
-                      const Expanded(child: Divider()),
-                      Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text('OR',
-                            style: GoogleFonts.dmSans(
-                                color: AppTheme.gray, fontSize: 12)),
-                      ),
-                      const Expanded(child: Divider()),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Tombol Google
+                  // Google Button
                   _GoogleButton(
                     loading: _googleLoading,
                     onTap: _loginGoogle,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  // Link ke Login
+                  // Login Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Already have an account? ',
                         style: GoogleFonts.dmSans(
-                            color: AppTheme.gray, fontSize: 13),
+                            color: AppTheme.gray, fontSize: 14),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Text(
-                          'Login here',
+                          'Login',
                           style: GoogleFonts.dmSans(
                               color: AppTheme.orange,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800),
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),

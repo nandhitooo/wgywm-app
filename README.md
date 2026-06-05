@@ -1,24 +1,26 @@
 # 🏋️ W-GYM — Workout Tracker App
 
-> Aplikasi pencatatan aktivitas gym berbasis Flutter dengan sinkronisasi offline-first menggunakan Hive dan Firebase Firestore.
+> Aplikasi pencatatan aktivitas gym berbasis Flutter dengan desain modern dan sinkronisasi offline-first menggunakan Hive dan Firebase Firestore.
 
 ---
 
 ## 📱 Tentang Aplikasi
 
-**W-GYM** adalah aplikasi mobile workout tracker yang memungkinkan pengguna mencatat aktivitas latihan harian seperti nama latihan, durasi, kalori yang terbakar, dan jumlah repetisi. Aplikasi ini dirancang dengan pendekatan **offline-first**, sehingga tetap bisa digunakan tanpa koneksi internet dan akan otomatis menyinkronkan data ke cloud saat koneksi tersedia.
+**W-GYM** adalah aplikasi mobile workout tracker yang memungkinkan pengguna mencatat aktivitas latihan harian seperti nama latihan, durasi, kalori yang terbakar, dan jumlah repetisi. Aplikasi ini dirancang dengan pendekatan **offline-first** dan **Modern UI/UX**, memberikan pengalaman pengguna yang intuitif dan visual yang menarik.
 
 ---
 
 ## ✨ Fitur Utama
 
-- **Autentikasi Pengguna** — Login & Register dengan email/password atau Google Sign-In
-- **Catat Aktivitas** — Input nama latihan, durasi, kalori, dan reps
-- **Dashboard Harian** — Ringkasan total kalori, durasi, dan reps hari ini
-- **Riwayat Aktivitas** — Lihat seluruh histori latihan
-- **Offline Support** — Data tersimpan lokal menggunakan Hive, tetap berfungsi tanpa internet
-- **Auto Sync** — Data otomatis tersinkronisasi ke Firestore saat koneksi tersedia
-- **Profil Pengguna** — Data pribadi seperti nama, berat badan, tinggi badan, dan tanggal lahir
+- **Modern UI/UX** — Desain premium dengan gradien, bayangan lembut, dan tata letak modern.
+- **Visualisasi Data** — Grafik progres kalori mingguan yang interaktif menggunakan `fl_chart`.
+- **Autentikasi Pengguna** — Login & Register dengan email/password atau Google Sign-In.
+- **Catat Aktivitas** — Input latihan dengan kategori yang mudah digunakan dan kalkulasi kalori otomatis.
+- **Dashboard Cerdas** — Ringkasan harian dengan salam dinamis dan statistik yang disinkronkan.
+- **Riwayat Aktivitas** — Histori latihan lengkap dengan ikon cerdas berdasarkan jenis latihan.
+- **Offline Support** — Data tersimpan lokal menggunakan Hive, tetap berfungsi tanpa internet.
+- **Auto Sync** — Sinkronisasi otomatis ke Firestore saat koneksi tersedia.
+- **Profil Pengguna** — Manajemen profil lengkap termasuk foto profil (Base64), BMI, dan pengaturan Dark Mode.
 
 ---
 
@@ -33,6 +35,7 @@
 | Auth | Firebase Auth, Google Sign-In |
 | Connectivity | connectivity_plus |
 | Code Gen | build_runner, hive_generator |
+| Utils | intl, uuid, image_picker |
 
 ---
 
@@ -40,33 +43,33 @@
 
 ```
 wgywm-app/
-├── android/                    # Konfigurasi Android
-├── assets/
-│   └── icon.png                # App icon
+├── android/                    # Konfigurasi platform Android
+├── assets/                     # Aset gambar dan icon
 ├── lib/
-│   ├── main.dart               # Entry point — init Hive + Firebase, cek status login
-│   ├── firebase_options.dart   # Auto-generated oleh flutterfire configure
+│   ├── main.dart               # Entry point aplikasi
+│   ├── firebase_options.dart   # Konfigurasi Firebase (auto-generated)
 │   ├── models/
-│   │   ├── activity.dart       # Model data Hive (Activity)
+│   │   ├── activity.dart       # Model data Activity
 │   │   └── activity.g.dart     # Hive adapter (generated)
 │   ├── services/
-│   │   ├── auth_service.dart   # Firebase Auth (register, login, Google Sign-In)
-│   │   └── activity_service.dart # Hive + Firestore sync service
+│   │   ├── auth_service.dart   # Layanan Firebase Auth & Profile
+│   │   ├── activity_service.dart # Layanan Hive & Firestore Sync
+│   │   └── theme_service.dart  # Layanan manajemen tema & navigasi
 │   ├── screens/
-│   │   ├── login_screen.dart   # Halaman login
-│   │   ├── register_screen.dart # Halaman registrasi
-│   │   ├── main_nav.dart       # Bottom navigation utama
-│   │   ├── dashboard_screen.dart # Dashboard ringkasan harian
-│   │   ├── add_screen.dart     # Form tambah aktivitas
-│   │   ├── history_screen.dart # Riwayat aktivitas
-│   │   └── profile_screen.dart # Profil pengguna
+│   │   ├── login_screen.dart   # Autentikasi Login
+│   │   ├── register_screen.dart # Registrasi Akun Baru
+│   │   ├── main_nav.dart       # Navigasi Bottom Bar Modern
+│   │   ├── dashboard_screen.dart # Ringkasan Progres & Grafik
+│   │   ├── add_screen.dart     # Form Input Aktivitas
+│   │   ├── history_screen.dart # Histori Aktivitas Lengkap
+│   │   └── profile_screen.dart # Profil & Pengaturan
 │   ├── widgets/
-│   │   └── activity_card.dart  # Widget kartu aktivitas
+│   │   └── activity_card.dart  # Komponen Kartu Aktivitas Ikonik
 │   └── theme/
-│       └── app_theme.dart      # Konfigurasi tema aplikasi
-├── web/                        # Konfigurasi Web (PWA)
-├── windows/                    # Konfigurasi Windows desktop
-├── pubspec.yaml                # Dependency management
+│       └── app_theme.dart      # Definisi Tema Modern (Light/Dark)
+├── web/                        # Konfigurasi platform Web
+├── windows/                    # Konfigurasi platform Windows
+├── pubspec.yaml                # Manajemen Dependency
 └── firebase.json               # Konfigurasi Firebase
 ```
 
@@ -75,10 +78,10 @@ wgywm-app/
 ## ⚙️ Cara Kerja Offline + Sync
 
 ```
-Ada internet      → simpan ke Hive + langsung sync ke Firestore
-Tidak ada internet → simpan ke Hive saja (flag synced: false)
-Internet kembali  → semua data pending otomatis dikirim ke Firestore
-Buka app baru     → fetch data terbaru dari Firestore ke Hive
+Ada internet      → Simpan ke Hive + Langsung sync ke Firestore
+Tidak ada internet → Simpan ke Hive saja (flag synced: false)
+Internet kembali  → Semua data pending otomatis dikirim ke Firestore via syncPending()
+Buka app baru     → Mengunduh data terbaru dari Firestore ke Hive
 ```
 
 ---
@@ -89,8 +92,7 @@ Buka app baru     → fetch data terbaru dari Firestore ke Hive
 
 - Flutter SDK `>=3.0.0 <4.0.0`
 - Dart SDK
-- Android Studio / VS Code
-- Akun Firebase (untuk konfigurasi backend)
+- Firebase Account & CLI
 
 ### Langkah-langkah
 
@@ -106,14 +108,12 @@ flutter pub get
 ```
 
 **3. Konfigurasi Firebase**
-
-Pastikan file `lib/firebase_options.dart` sudah ada. Jika belum, jalankan:
+Jalankan perintah berikut untuk mengonfigurasi Firebase:
 ```bash
 flutterfire configure
 ```
-> Ikuti panduan untuk menghubungkan project ke Firebase Console.
 
-**4. Generate Hive adapter** *(jika diperlukan)*
+**4. Generate Hive adapter**
 ```bash
 dart run build_runner build
 ```
@@ -125,34 +125,15 @@ flutter run
 
 ---
 
-## 🗃️ Model Data
+## 🎨 Design System
 
-### Activity
-
-| Field | Tipe | Keterangan |
-|---|---|---|
-| `id` | String | UUID unik per aktivitas |
-| `name` | String | Nama latihan |
-| `durationMinutes` | int | Durasi dalam menit |
-| `calories` | int | Kalori yang terbakar |
-| `reps` | int | Jumlah repetisi |
-| `date` | DateTime | Tanggal dan waktu aktivitas |
-| `userId` | String | UID pengguna dari Firebase Auth |
-| `synced` | bool | Status sinkronisasi ke Firestore |
-
----
-
-## 🔐 Autentikasi
-
-Aplikasi mendukung dua metode autentikasi via Firebase Auth:
-
-- **Email & Password** — Register dan login dengan email
-- **Google Sign-In** — Login satu klik menggunakan akun Google
-
-Data profil pengguna (nama, email, tanggal lahir, berat, tinggi) disimpan di koleksi `users` pada Firestore.
+Aplikasi ini menggunakan sistem desain yang konsisten:
+- **Primary Color:** Orange (`#F5A623`) dengan gradien ke Dark Orange.
+- **Typography:** `DM Sans` untuk keterbacaan tinggi dan `Bebas Neue` untuk aksen judul yang sporty.
+- **Components:** Card dengan radius 16-24px, bayangan lembut, dan indikator aktif yang intuitif.
 
 ---
 
 ## 📄 Lisensi
 
-Proyek ini bersifat privat (`publish_to: none`). Hak cipta milik **nandhitooo**.
+Proyek ini bersifat privat (`publish_to: none`). Dikembangkan oleh **nandhitooo**.

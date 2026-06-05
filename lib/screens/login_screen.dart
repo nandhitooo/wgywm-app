@@ -78,30 +78,43 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
-          // Header orange
+          // Header with Gradient
           Container(
             width: double.infinity,
-            color: AppTheme.orange,
+            decoration: BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.orange.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
             padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 32,
-              left: 24, right: 24, bottom: 32,
+              top: MediaQuery.of(context).padding.top + 48,
+              left: 32, right: 32, bottom: 48,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Welcome back',
+                  'WELCOME BACK',
                   style: GoogleFonts.dmSans(
-                      color: Colors.white.withOpacity(0.75), fontSize: 13),
+                      color: Colors.white.withOpacity(0.8), 
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   'Login to your\nAccount',
                   style: GoogleFonts.bebasNeue(
                       color: Colors.white,
-                      fontSize: 42,
-                      letterSpacing: 1.5,
-                      height: 1.05),
+                      fontSize: 48,
+                      letterSpacing: 1,
+                      height: 1),
                 ),
               ],
             ),
@@ -110,21 +123,24 @@ class _LoginScreenState extends State<LoginScreen> {
           // Form
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
               child: Column(
                 children: [
-                  const SizedBox(height: 8),
                   TextField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(hintText: 'Email'),
+                    decoration: const InputDecoration(
+                      hintText: 'Email Address',
+                      prefixIcon: Icon(Icons.email_outlined, size: 20),
+                    ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 20),
                   TextField(
                     controller: _passCtrl,
                     obscureText: _obscure,
                     decoration: InputDecoration(
                       hintText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline, size: 20),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure
@@ -137,51 +153,66 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  // Tombol Login
-                  ElevatedButton(
-                    onPressed: _loading ? null : _login,
-                    child: _loading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2))
-                        : const Text('LOGIN'),
+                  // Login Button with Shadow
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.orange.withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _login,
+                      child: _loading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2))
+                          : const Text('LOGIN'),
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
                   // Divider OR
                   Row(
                     children: [
                       const Expanded(child: Divider()),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text('OR',
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('OR CONTINUE WITH',
                             style: GoogleFonts.dmSans(
-                                color: AppTheme.gray, fontSize: 12)),
+                                color: AppTheme.gray, 
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1)),
                       ),
                       const Expanded(child: Divider()),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
-                  // Tombol Google
+                  // Google Button
                   _GoogleButton(
                     loading: _googleLoading,
                     onTap: _loginGoogle,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  // Link ke Register
+                  // Register Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Don\'t have an account? ',
                         style: GoogleFonts.dmSans(
-                            color: AppTheme.gray, fontSize: 13),
+                            color: AppTheme.gray, fontSize: 14),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.push(
@@ -190,11 +221,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               builder: (_) => const RegisterScreen()),
                         ),
                         child: Text(
-                          'Register here',
+                          'Register',
                           style: GoogleFonts.dmSans(
                               color: AppTheme.orange,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800),
                         ),
                       ),
                     ],
