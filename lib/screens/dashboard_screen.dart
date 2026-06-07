@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../models/activity.dart';
 import '../services/activity_service.dart';
 import '../services/auth_service.dart';
+import '../services/theme_service.dart';
 import '../widgets/activity_card.dart';
 import 'package:wgym/l10n/app_localizations.dart';
 
@@ -229,11 +230,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   color:
                                       Theme.of(context).colorScheme.onSurface,
                                   letterSpacing: 1)),
-                          Text(l10n.seeAll,
-                              style: GoogleFonts.dmSans(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.orange)),
+                          GestureDetector(
+                            onTap: () => ThemeService.setNavIndex(2),
+                            child: Text(l10n.seeAll,
+                                style: GoogleFonts.dmSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.orange)),
+                          ),
                         ],
                       ),
                     ],
@@ -265,11 +269,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         delegate: SliverChildBuilderDelegate(
                           (context, index) => ActivityCard(
                               activity: today[index], showToday: true),
-                          childCount: today.length,
+                          childCount: today.length > 3 ? 3 : today.length,
                         ),
                       ),
                     ),
-              const SliverToBoxAdapter(child: SizedBox(height: 80)),
+              const SliverToBoxAdapter(child: SizedBox(height: 110)),
             ],
           );
         },

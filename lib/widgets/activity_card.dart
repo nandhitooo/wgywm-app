@@ -23,10 +23,12 @@ class ActivityCard extends StatelessWidget {
     if (n.contains('swim')) return Icons.pool;
     if (n.contains('push up')) return Icons.fitness_center;
     if (n.contains('sit up')) return Icons.accessibility_new;
-    if (n.contains('yoga') || n.contains('stretch'))
+    if (n.contains('yoga') || n.contains('stretch')) {
       return Icons.self_improvement;
-    if (n.contains('football') || n.contains('soccer'))
+    }
+    if (n.contains('football') || n.contains('soccer')) {
       return Icons.sports_soccer;
+    }
     if (n.contains('badminton')) return Icons.sports_tennis;
     if (n.contains('hike')) return Icons.terrain;
     if (n.contains('jump rope')) return Icons.reorder;

@@ -60,7 +60,7 @@ class WGymApp extends StatelessWidget {
               darkTheme: AppTheme.darkTheme,
               themeMode: mode,
               locale: locale,
-              localizationsDelegates: [
+              localizationsDelegates: const [
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,

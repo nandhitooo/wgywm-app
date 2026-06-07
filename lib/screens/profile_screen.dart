@@ -286,7 +286,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   double get _bmi {
     if (_birthDate == null ||
         _weightCtrl.text.isEmpty ||
-        _heightCtrl.text.isEmpty) return 0;
+        _heightCtrl.text.isEmpty) {
+      return 0;
+    }
     final weight = double.tryParse(_weightCtrl.text) ?? 0;
     final height = double.tryParse(_heightCtrl.text) ?? 0;
     if (weight <= 0 || height <= 0) return 0;
@@ -565,7 +567,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(l10n.weight + ' (kg)',
+                                Text('${l10n.weight} (kg)',
                                     style: GoogleFonts.dmSans(
                                         color: AppTheme.gray,
                                         fontSize: 12,
@@ -579,7 +581,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                       const SizedBox(height: 18),
-                      Text(l10n.height + ' (cm)',
+                      Text('${l10n.height} (cm)',
                           style: GoogleFonts.dmSans(
                               color: AppTheme.gray,
                               fontSize: 12,
@@ -796,7 +798,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         trailing: Switch(
                           value: ThemeService.isDarkMode,
-                          activeColor: AppTheme.orange,
+                          activeThumbColor: AppTheme.orange,
                           onChanged: (val) {
                             ThemeService.toggleTheme();
                           },

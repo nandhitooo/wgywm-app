@@ -298,7 +298,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           controller: _weightCtrl,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            hintText: l10n.weight + ' (kg)',
+                            hintText: '${l10n.weight} (kg)',
                             prefixIcon: const Icon(
                                 Icons.monitor_weight_outlined,
                                 size: 20),
@@ -311,7 +311,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           controller: _heightCtrl,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            hintText: l10n.height + ' (cm)',
+                            hintText: '${l10n.height} (cm)',
                             prefixIcon:
                                 const Icon(Icons.height_outlined, size: 20),
                           ),

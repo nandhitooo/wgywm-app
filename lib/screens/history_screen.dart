@@ -199,37 +199,40 @@ class HistoryScreen extends StatelessWidget {
                       )
                     : ListView(
                         padding: const EdgeInsets.all(16),
-                        children: grouped.entries.map((entry) {
-                          final isToday = entry.key == now;
-                          final isYesterday = entry.key == yesterday;
+                        children: [
+                          ...grouped.entries.map((entry) {
+                            final isToday = entry.key == now;
+                            final isYesterday = entry.key == yesterday;
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(bottom: 10, top: 4),
-                                child: Text(
-                                  entry.key.toUpperCase(),
-                                  style: GoogleFonts.dmSans(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppTheme.gray,
-                                      letterSpacing: 0.8),
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(bottom: 10, top: 4),
+                                  child: Text(
+                                    entry.key.toUpperCase(),
+                                    style: GoogleFonts.dmSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.gray,
+                                        letterSpacing: 0.8),
+                                  ),
                                 ),
-                              ),
-                              ...entry.value.map((a) => _ActivityCard(
-                                    activity: a,
-                                    isToday: isToday,
-                                    isYesterday: isYesterday,
-                                    onEdit: () => _showEditDialog(context, a),
-                                    onDelete: () =>
-                                        _showDeleteDialog(context, a),
-                                  )),
-                              const SizedBox(height: 8),
-                            ],
-                          );
-                        }).toList(),
+                                ...entry.value.map((a) => _ActivityCard(
+                                      activity: a,
+                                      isToday: isToday,
+                                      isYesterday: isYesterday,
+                                      onEdit: () => _showEditDialog(context, a),
+                                      onDelete: () =>
+                                          _showDeleteDialog(context, a),
+                                    )),
+                                const SizedBox(height: 8),
+                              ],
+                            );
+                          }),
+                          const SizedBox(height: 100),
+                        ],
                       ),
               ),
             ],
