@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:device_preview/device_preview.dart';
 import 'firebase_options.dart';
 import 'models/activity.dart';
 import 'services/activity_service.dart';
@@ -37,7 +39,12 @@ void main() async {
     ),
   );
 
-  runApp(const WGymApp());
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => const WGymApp(),
+    ),
+  );
 }
 
 class WGymApp extends StatelessWidget {
@@ -59,7 +66,9 @@ class WGymApp extends StatelessWidget {
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
               themeMode: mode,
-              locale: locale,
+              useInheritedMediaQuery: true,
+              builder: DevicePreview.appBuilder,
+              locale: DevicePreview.locale(context) ?? locale,
               localizationsDelegates: const [
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,

@@ -12,6 +12,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  device_preview: ^1.2.0
+
   # UI & Fonts
   google_fonts: ^6.1.0
   fl_chart: ^0.66.2
